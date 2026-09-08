@@ -22,8 +22,9 @@
             --color-result: #2b3648;
             --color-early: #881337;
 
-            /* Dynamic continuous scaling variable */
-            --content-max-w: 980px;
+            /* Dynamic continuous scaling variable for arena */
+            --arena-max-w: 960px;
+            --scoreboard-max-w: 960px;
         }
 
         * {
@@ -63,20 +64,39 @@
             gap: 14px;
         }
 
-        /* Continuous linear scaling of content & arena */
+        /* Central wrapper with aligned children */
         .content-wrap {
             width: 100%;
-            max-width: var(--content-max-w, 980px);
+            max-width: 100vw;
             display: flex;
             flex-direction: column;
+            align-items: center;
             gap: 14px;
-            transition: max-width 0.12s ease-out;
             margin: 0 auto;
+        }
+
+        /* Fixed Anchor Elements: NEVER shift horizontally while dragging the slider! */
+        header,
+        .toolbar-card,
+        .controls-row {
+            width: 100%;
+            max-width: 70vw;
+        }
+
+        /* Dynamic Scaling Elements: Arena, Scoreboard, and Dashboard */
+        .scoreboard-card,
+        .dashboard-bar {
+            width: 100%;
+            max-width: var(--scoreboard-max-w, 960px);
+        }
+
+        .arena-viewport-wrapper {
+            width: 100%;
+            max-width: var(--arena-max-w, 960px);
         }
 
         /* Header */
         header {
-            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -132,9 +152,8 @@
             50% { opacity: 0.4; transform: scale(0.85); }
         }
 
-        /* Sizing & Micro-Mode Toolbar */
+        /* Sizing Toolbar (Rock-solid anchor position) */
         .toolbar-card {
-            width: 100%;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -173,8 +192,8 @@
 
         .slider-wrap input[type="range"] {
             -webkit-appearance: none;
-            width: 130px;
-            height: 6px;
+            width: 140px;
+            height: 8px;
             background: #263244;
             border-radius: 4px;
             outline: none;
@@ -183,8 +202,8 @@
 
         .slider-wrap input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: #38bdf8;
             cursor: pointer;
@@ -193,7 +212,7 @@
         }
 
         .slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
+            transform: scale(1.15);
         }
 
         .scale-badge {
@@ -258,7 +277,6 @@
 
         /* Continuous Dynamic Scoreboard */
         .scoreboard-card {
-            width: 100%;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -353,12 +371,10 @@
         /* Arena Playground Wrapper */
         .arena-viewport-wrapper {
             position: relative;
-            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 460px;
-            transition: all 0.2s ease;
         }
 
         .arena-viewport-wrapper.micro-playfield {
@@ -561,7 +577,6 @@
 
         /* Dashboard Bar */
         .dashboard-bar {
-            width: 100%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
@@ -596,7 +611,6 @@
 
         /* Controls Footer */
         .controls-row {
-            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -685,7 +699,7 @@
             </div>
         </header>
 
-        <!-- Sizing & Micro-Mode Toolbar -->
+        <!-- Sizing & Micro-Mode Toolbar (Centered at stable 960px max-width, never shifts while dragging!) -->
         <div class="toolbar-card">
             <div class="toolbar-group">
                 <span class="toolbar-label">
@@ -735,7 +749,7 @@
             </table>
         </div>
 
-        <!-- Arena Playground Wrapper (Zero clutter, directly under scoreboard) -->
+        <!-- Arena Playground Wrapper -->
         <div id="arena-wrapper" class="arena-viewport-wrapper">
             <div id="arena" class="reaction-arena state-idle" tabindex="0">
                 <div id="arena-content" class="arena-content">
@@ -785,13 +799,12 @@
     /**
      * ULTRA-PRECISION REACTION ENGINE
      * ------------------------------------------------------------------
-     * 1. Clean, minimalist layout without redundant middle banners.
-     * 2. Continuous smooth linear viewport scaling (70vw, 80vw, 95vw etc.).
-     * 3. Scoreboard on top + stats at bottom + direct target feedback.
-     * 4. Zero DOM layout shift (CLS = 0).
+     * 1. Anchored Toolbar: Fixed center geometry so the slider NEVER
+     *    drifts or runs away while the user is actively dragging it!
+     * 2. Direct Smooth Linear Scaling: Arena & Scoreboard scale continuously.
+     * 3. Hardware-level accuracy (pointerdown, event.timeStamp, double rAF).
      */
 
-    const contentWrap = document.getElementById('content-wrap');
     const arenaWrapper = document.getElementById('arena-wrapper');
     const arena = document.getElementById('arena');
     const arenaContent = document.getElementById('arena-content');
@@ -819,7 +832,7 @@
     let stimulusStartTime = 0;
     let currentScalePct = 70;
 
-    // --- Continuous Dynamic Sizing Logic ---
+    // --- Dynamic Sizing Logic (Zero Slider Shift) ---
     function applyScale(pct) {
         currentScalePct = parseInt(pct, 10);
         sizeSlider.value = currentScalePct;
@@ -838,9 +851,11 @@
             arenaWrapper.classList.add('micro-playfield');
             arena.classList.add('is-micro');
 
-            document.documentElement.style.setProperty('--content-max-w', 'min(96vw, 980px)');
+            document.documentElement.style.setProperty('--arena-max-w', '960px');
+            document.documentElement.style.setProperty('--scoreboard-max-w', '960px');
 
-            const targetSize = Math.round(55 + (currentScalePct / 25) * 100);
+            // Target circle size scales continuously: 10% -> 60px, 25% -> 150px
+            const targetSize = Math.round(60 + ((currentScalePct - 10) / 15) * 90);
             arena.style.width = `${targetSize}px`;
             arena.style.height = `${targetSize}px`;
 
@@ -857,9 +872,13 @@
             arena.style.left = 'auto';
             arena.style.transform = 'none';
 
-            // Linear scaling across the whole range
-            const targetWidthPx = Math.max(740, Math.round((currentScalePct / 100) * window.innerWidth));
-            document.documentElement.style.setProperty('--content-max-w', `min(96vw, ${targetWidthPx}px)`);
+            // Continuous viewport width scaling for the reaction arena (30vw, 50vw, 80vw, 95vw etc.)
+            const arenaWidthPx = Math.round((currentScalePct / 100) * window.innerWidth);
+            document.documentElement.style.setProperty('--arena-max-w', `min(96vw, ${arenaWidthPx}px)`);
+
+            // Scoreboard & dashboard expand with arena when >960px, but stay comfortably at 960px when smaller
+            const scoreWidthPx = Math.max(960, arenaWidthPx);
+            document.documentElement.style.setProperty('--scoreboard-max-w', `min(96vw, ${scoreWidthPx}px)`);
 
             const heightPx = Math.round(300 + ((currentScalePct - 25) / 70) * (window.innerHeight * 0.44));
             arena.style.width = '100%';
@@ -1076,13 +1095,11 @@
         const currentRounded = Math.round(currentMs);
 
         if (currentScalePct <= 25) {
-            // Direct clean result on the target itself!
             arenaContent.innerHTML = `
                 <div class="arena-title" style="font-size: 1.15rem; font-weight:800; color:#4ade80;">${currentRounded}</div>
                 <div style="font-size: 0.65rem; opacity:0.85; margin-top:2px;">URMĂTORUL</div>
             `;
         } else {
-            // Full puerman.net split layout directly inside arena
             arenaContent.innerHTML = `
                 <div class="puerman-result-layout" style="margin-bottom: 18px;">
                     <div class="puerman-col left">
