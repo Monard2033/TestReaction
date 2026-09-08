@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Test Viteză de Reacție - Scalabil & Sesiune Continuă</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #0a0e17;
+            --card-bg: #141b26;
+            --border-color: #263244;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            
+            /* State Colors */
+            --color-idle: #3e4c5f;
+            --color-wait: #b91c1c;
+            --color-go: #16a34a;
+            --color-result: #2b3648;
+            --color-early: #881337;
+
+            /* Dynamic continuous scaling variable */
+            --content-max-w: 980px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 16px;
+            overflow-x: hidden;
+            touch-action: manipulation;
+            transition: padding 0.2s ease;
+        }
+
+        body.is-immersive {
+            padding: 8px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* Continuous linear scaling of content & arena */
+        .content-wrap {
+            width: 100%;
+            max-width: var(--content-max-w, 980px);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: max-width 0.12s ease-out;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 4px;
+        }
+
+        .title-group h1 {
+            font-size: 1.55rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 30%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-group p {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            margin-top: 2px;
+        }
+
+        .header-badges {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-precision {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-precision .dot {
+            width: 6px;
+            height: 6px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        /* Sizing & Micro-Mode Toolbar */
+        .toolbar-card {
+            width: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-wrap input[type="range"] {
+            -webkit-appearance: none;
+            width: 130px;
+            height: 6px;
+            background: #263244;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .slider-wrap input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+            transition: transform 0.1s;
+        }
+
+        .slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .scale-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            padding: 2px 7px;
+            border-radius: 6px;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-preset {
+            background: #1a2332;
+            border: 1px solid var(--border-color);
+            color: #94a3b8;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-preset:hover {
+            color: #f1f5f9;
+            border-color: #38bdf8;
+        }
+
+        .btn-preset.active {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(2, 132, 199, 0.4);
+        }
+
+        .toggle-option {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .toggle-option input[type="checkbox"] {
+            cursor: pointer;
+            accent-color: #38bdf8;
+            width: 15px;
+            height: 15px;
+        }
+
+        /* Continuous Dynamic Scoreboard */
+        .scoreboard-card {
+            width: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #38bdf8 #1a2332;
+        }
+
+        .scoreboard-card::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .scoreboard-card::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 4px;
+        }
+
+        .scoreboard-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+
+        .scoreboard-table .label-col {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            padding-right: 8px;
+            width: 100px;
+            white-space: nowrap;
+        }
+
+        .scoreboard-table th {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 5px 2px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+            transition: font-size 0.15s ease, padding 0.15s ease;
+        }
+
+        .scoreboard-table td {
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 8px 2px 3px 2px;
+            color: #cbd5e1;
+            white-space: nowrap;
+            transition: font-size 0.15s ease, padding 0.15s ease;
+        }
+
+        .scoreboard-table td.active-cell {
+            color: #38bdf8;
+            position: relative;
+        }
+
+        .scoreboard-table td.active-cell::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 15%;
+            width: 70%;
+            height: 2px;
+            background: #38bdf8;
+            border-radius: 2px;
+        }
+
+        .scoreboard-table td.highlight-best {
+            color: #4ade80;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.45);
+        }
+
+        /* Density compacting classes */
+        .scoreboard-table.density-compact th { font-size: 0.75rem; padding: 4px 1px; }
+        .scoreboard-table.density-compact td { font-size: 0.9rem; padding: 6px 1px 2px 1px; }
+        .scoreboard-table.density-compact .label-col { width: 88px; font-size: 0.77rem; }
+
+        .scoreboard-table.density-dense th { font-size: 0.68rem; padding: 3px 0; }
+        .scoreboard-table.density-dense td { font-size: 0.81rem; padding: 5px 0 2px 0; letter-spacing: -0.4px; }
+        .scoreboard-table.density-dense .label-col { width: 80px; font-size: 0.72rem; }
+
+        .scoreboard-table.density-ultra th { font-size: 0.62rem; padding: 2px 0; }
+        .scoreboard-table.density-ultra td { font-size: 0.73rem; padding: 4px 0 2px 0; letter-spacing: -0.8px; }
+        .scoreboard-table.density-ultra .label-col { width: 74px; font-size: 0.68rem; }
+
+        /* Arena Playground Wrapper */
+        .arena-viewport-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 460px;
+            transition: all 0.2s ease;
+        }
+
+        .arena-viewport-wrapper.micro-playfield {
+            background: rgba(20, 27, 38, 0.4);
+            border: 1px dashed var(--border-color);
+            border-radius: 18px;
+            height: 440px;
+            overflow: hidden;
+        }
+
+        /* The Main Interactive Reaction Pad / Target */
+        .reaction-arena {
+            position: relative;
+            outline: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.08s ease, transform 0.06s ease, box-shadow 0.2s ease;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+            will-change: background-color, transform;
+            overflow: hidden;
+
+            width: 100%;
+            height: 460px;
+            border-radius: 18px;
+            background-color: var(--color-idle);
+        }
+
+        .reaction-arena:active {
+            transform: scale(0.995);
+        }
+
+        /* States */
+        .reaction-arena.state-idle { background-color: var(--color-idle); }
+        .reaction-arena.state-wait { background-color: var(--color-wait); cursor: wait; }
+        .reaction-arena.state-go {
+            background-color: var(--color-go);
+            box-shadow: 0 0 50px rgba(22, 163, 74, 0.65);
+        }
+        .reaction-arena.state-result { background-color: var(--color-result); }
+        .reaction-arena.state-early { background-color: var(--color-early); }
+
+        /* Micro Target Styling (10% - 25%) */
+        .reaction-arena.is-micro {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.15);
+        }
+
+        .reaction-arena.is-micro:active {
+            transform: scale(0.94);
+        }
+
+        .reaction-arena.is-micro.state-go {
+            box-shadow: 0 0 35px #22c55e, 0 0 0 4px #4ade80;
+            animation: pulse-target 0.6s infinite alternate;
+        }
+
+        @keyframes pulse-target {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        /* Arena Contents */
+        .arena-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            padding: 20px;
+            pointer-events: none;
+        }
+
+        .arena-title {
+            font-size: clamp(2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+
+        .arena-subtitle {
+            font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+            font-weight: 500;
+            opacity: 0.92;
+            max-width: 580px;
+            line-height: 1.4;
+        }
+
+        /* Micro Content */
+        .is-micro .arena-content {
+            padding: 4px;
+        }
+
+        .is-micro .arena-title {
+            font-size: clamp(1rem, 2.8vw, 1.4rem);
+            margin-bottom: 0;
+            letter-spacing: 0;
+        }
+
+        .is-micro .arena-subtitle,
+        .is-micro .action-hint,
+        .is-micro .puerman-result-layout {
+            display: none !important;
+        }
+
+        .micro-indicator-icon {
+            display: none;
+        }
+
+        .is-micro .micro-indicator-icon {
+            display: block;
+            font-size: 1.6rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+        }
+
+        /* Puerman Big Split Result Layout (Shown inside arena in normal/large mode) */
+        .puerman-result-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            max-width: 780px;
+            align-items: center;
+            margin-bottom: 0;
+            padding: 0 10px;
+        }
+
+        .puerman-col {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .puerman-col.left {
+            gap: 18px;
+            justify-content: flex-end;
+            padding-right: 32px;
+            border-right: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .puerman-col.right {
+            justify-content: flex-start;
+            padding-left: 32px;
+        }
+
+        .puerman-meta {
+            text-align: right;
+            text-transform: uppercase;
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1.35;
+            letter-spacing: 0.5px;
+            opacity: 0.85;
+        }
+
+        .puerman-number-avg {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(2.8rem, 5.5vw, 4.4rem);
+            font-weight: 800;
+            line-height: 1;
+            color: #ffffff;
+            letter-spacing: -2px;
+        }
+
+        .puerman-number-current {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(2.8rem, 5.5vw, 4.4rem);
+            font-weight: 800;
+            line-height: 1;
+            color: #ffffff;
+            letter-spacing: -2px;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            transition: color 0.1s ease, opacity 0.1s ease;
+        }
+
+        .puerman-unit {
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            font-weight: 700;
+            opacity: 0.85;
+            letter-spacing: normal;
+        }
+
+        .action-hint {
+            font-size: 1rem;
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 9px 20px;
+            border-radius: 9999px;
+            backdrop-filter: blur(8px);
+            margin-top: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Dashboard Bar */
+        .dashboard-bar {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-val.val-best { color: #4ade80; }
+        .stat-val.val-worst { color: #f87171; }
+
+        /* Controls Footer */
+        .controls-row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2px;
+        }
+
+        .btn-action {
+            background: #1e293b;
+            border: 1px solid var(--border-color);
+            color: #cbd5e1;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-action:hover {
+            background: #334155;
+            color: #ffffff;
+            border-color: #64748b;
+        }
+
+        .hint-keyboard {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .hint-keyboard kbd {
+            background-color: #1e293b;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #f1f5f9;
+        }
+
+        @media (max-width: 768px) {
+            .toolbar-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .toolbar-group {
+                justify-content: space-between;
+            }
+            .puerman-result-layout {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .puerman-col.left {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+                padding-right: 0;
+                padding-bottom: 12px;
+                justify-content: center;
+            }
+            .puerman-col.right {
+                padding-left: 0;
+                justify-content: center;
+            }
+            .dashboard-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="main-container" class="container">
+    <div id="content-wrap" class="content-wrap">
+        <header>
+            <div class="title-group">
+                <h1>Test Viteză de Reacție</h1>
+                <p>Măsurare ultra-precisă a latenței neuromusculare (Hardware Input Timestamp)</p>
+            </div>
+            <div class="header-badges">
+                <div class="badge-precision">
+                    <span class="dot"></span>
+                    0-DELAY ENGINE
+                </div>
+            </div>
+        </header>
+
+        <!-- Sizing & Micro-Mode Toolbar -->
+        <div class="toolbar-card">
+            <div class="toolbar-group">
+                <span class="toolbar-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <polyline points="9 21 3 21 3 15"></polyline>
+                        <line x1="21" y1="3" x2="14" y2="10"></line>
+                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                    </svg>
+                    Dimensiune:
+                </span>
+                <div class="slider-wrap">
+                    <input type="range" id="size-slider" min="10" max="95" value="70" step="1">
+                    <span id="size-badge" class="scale-badge">70%</span>
+                </div>
+                <div class="preset-buttons">
+                    <button class="btn-preset" data-pct="10">🎯 10% Micro</button>
+                    <button class="btn-preset" data-pct="25">25%</button>
+                    <button class="btn-preset active" data-pct="70">70% Normal</button>
+                    <button class="btn-preset" data-pct="95">⚡ 95% Max</button>
+                </div>
+            </div>
+
+            <div class="toolbar-group">
+                <label class="toggle-option" title="La 10%-25%, ținta se mută în poziții aleatorii la fiecare rundă pentru antrenament flick reflex">
+                    <input type="checkbox" id="chk-random-pos">
+                    <span>Poziție aleatorie (Flick Reflex)</span>
+                </label>
+                <button id="btn-fullscreen" class="btn-action" style="padding: 5px 10px; font-size: 0.78rem;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                    Ecran Complet
+                </button>
+            </div>
+        </div>
+
+        <!-- Dynamic Continuous Scoreboard -->
+        <div class="scoreboard-card" id="scoreboard-card">
+            <table class="scoreboard-table" id="scoreboard-table">
+                <thead>
+                    <tr id="scoreboard-thead-row"></tr>
+                </thead>
+                <tbody>
+                    <tr id="scoreboard-tbody-row"></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Arena Playground Wrapper (Zero clutter, directly under scoreboard) -->
+        <div id="arena-wrapper" class="arena-viewport-wrapper">
+            <div id="arena" class="reaction-arena state-idle" tabindex="0">
+                <div id="arena-content" class="arena-content">
+                    <div class="arena-title">Click pentru Start</div>
+                    <div class="arena-subtitle">Când fundalul devine VERDE, apasă mouse-ul sau tasta SPAȚIU cât mai rapid posibil.</div>
+                    <div class="action-hint">Apasă oriunde pe ecran</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Bar -->
+        <div class="dashboard-bar">
+            <div class="stat-card">
+                <div class="stat-label">Încercări Finalizate</div>
+                <div class="stat-val" id="stat-count">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cel Mai Rapid (Best)</div>
+                <div class="stat-val val-best" id="stat-best">-- ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Media Sesiunii (Avg)</div>
+                <div class="stat-val" id="stat-avg">-- ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cel Mai Lent (Worst)</div>
+                <div class="stat-val val-worst" id="stat-worst">-- ms</div>
+            </div>
+        </div>
+
+        <div class="controls-row">
+            <button id="btn-reset" class="btn-action">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+                Resetează Sesiunea
+            </button>
+            <div class="hint-keyboard">
+                Control: <kbd>Click Stânga</kbd> sau <kbd>Bara de Spațiu</kbd>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * ULTRA-PRECISION REACTION ENGINE
+     * ------------------------------------------------------------------
+     * 1. Clean, minimalist layout without redundant middle banners.
+     * 2. Continuous smooth linear viewport scaling (70vw, 80vw, 95vw etc.).
+     * 3. Scoreboard on top + stats at bottom + direct target feedback.
+     * 4. Zero DOM layout shift (CLS = 0).
+     */
+
+    const contentWrap = document.getElementById('content-wrap');
+    const arenaWrapper = document.getElementById('arena-wrapper');
+    const arena = document.getElementById('arena');
+    const arenaContent = document.getElementById('arena-content');
+
+    const scoreboardCard = document.getElementById('scoreboard-card');
+    const scoreboardTable = document.getElementById('scoreboard-table');
+    const scoreboardTheadRow = document.getElementById('scoreboard-thead-row');
+    const scoreboardTbodyRow = document.getElementById('scoreboard-tbody-row');
+
+    const sizeSlider = document.getElementById('size-slider');
+    const sizeBadge = document.getElementById('size-badge');
+    const presetButtons = document.querySelectorAll('.btn-preset');
+    const chkRandomPos = document.getElementById('chk-random-pos');
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+
+    const statCount = document.getElementById('stat-count');
+    const statBest = document.getElementById('stat-best');
+    const statAvg = document.getElementById('stat-avg');
+    const statWorst = document.getElementById('stat-worst');
+    const btnReset = document.getElementById('btn-reset');
+
+    let scores = [];
+    let state = 'idle'; // 'idle' | 'waiting' | 'go' | 'result' | 'early'
+    let timerTimeoutId = null;
+    let stimulusStartTime = 0;
+    let currentScalePct = 70;
+
+    // --- Continuous Dynamic Sizing Logic ---
+    function applyScale(pct) {
+        currentScalePct = parseInt(pct, 10);
+        sizeSlider.value = currentScalePct;
+        sizeBadge.textContent = `${currentScalePct}%`;
+
+        presetButtons.forEach(btn => {
+            if (parseInt(btn.dataset.pct, 10) === currentScalePct) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        if (currentScalePct <= 25) {
+            document.body.classList.add('is-micro-mode');
+            arenaWrapper.classList.add('micro-playfield');
+            arena.classList.add('is-micro');
+
+            document.documentElement.style.setProperty('--content-max-w', 'min(96vw, 980px)');
+
+            const targetSize = Math.round(55 + (currentScalePct / 25) * 100);
+            arena.style.width = `${targetSize}px`;
+            arena.style.height = `${targetSize}px`;
+
+            if (!chkRandomPos.checked) {
+                resetTargetToCenter();
+            }
+        } else {
+            document.body.classList.remove('is-micro-mode');
+            arenaWrapper.classList.remove('micro-playfield');
+            arena.classList.remove('is-micro');
+
+            arena.style.position = 'relative';
+            arena.style.top = 'auto';
+            arena.style.left = 'auto';
+            arena.style.transform = 'none';
+
+            // Linear scaling across the whole range
+            const targetWidthPx = Math.max(740, Math.round((currentScalePct / 100) * window.innerWidth));
+            document.documentElement.style.setProperty('--content-max-w', `min(96vw, ${targetWidthPx}px)`);
+
+            const heightPx = Math.round(300 + ((currentScalePct - 25) / 70) * (window.innerHeight * 0.44));
+            arena.style.width = '100%';
+            arena.style.height = `${heightPx}px`;
+        }
+
+        refreshCurrentView();
+    }
+
+    function resetTargetToCenter() {
+        if (!arena.classList.contains('is-micro')) return;
+        arena.style.position = 'relative';
+        arena.style.top = 'auto';
+        arena.style.left = 'auto';
+        arena.style.transform = 'none';
+    }
+
+    function positionTargetRandomly() {
+        if (!arena.classList.contains('is-micro')) return;
+        if (!chkRandomPos.checked) {
+            resetTargetToCenter();
+            return;
+        }
+
+        const wrapperRect = arenaWrapper.getBoundingClientRect();
+        const targetW = arena.offsetWidth || 90;
+        const targetH = arena.offsetHeight || 90;
+
+        const maxLeft = Math.max(10, wrapperRect.width - targetW - 20);
+        const maxHeight = Math.max(10, wrapperRect.height - targetH - 20);
+
+        const randX = Math.floor(Math.random() * maxLeft) + 10;
+        const randY = Math.floor(Math.random() * maxHeight) + 10;
+
+        arena.style.position = 'absolute';
+        arena.style.left = `${randX}px`;
+        arena.style.top = `${randY}px`;
+        arena.style.transform = 'none';
+    }
+
+    sizeSlider.addEventListener('input', (e) => applyScale(e.target.value));
+
+    presetButtons.forEach(btn => {
+        btn.addEventListener('click', () => applyScale(btn.dataset.pct));
+    });
+
+    chkRandomPos.addEventListener('change', () => {
+        if (currentScalePct <= 25) {
+            if (chkRandomPos.checked) {
+                positionTargetRandomly();
+            } else {
+                resetTargetToCenter();
+            }
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        applyScale(currentScalePct);
+    });
+
+    btnFullscreen.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+            document.body.classList.add('is-immersive');
+            btnFullscreen.textContent = 'Ieși Ecran Complet';
+        } else {
+            document.exitFullscreen().catch(() => {});
+            document.body.classList.remove('is-immersive');
+            btnFullscreen.textContent = 'Ecran Complet';
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            document.body.classList.remove('is-immersive');
+            btnFullscreen.innerHTML = `
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg> Ecran Complet
+            `;
+        }
+    });
+
+    // --- Scoreboard Engine ---
+    function getRandomDelay(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function updateScoreboard() {
+        const slotCount = Math.max(10, scores.length + (scores.length >= 10 ? 1 : 0));
+
+        scoreboardTable.classList.remove('density-compact', 'density-dense', 'density-ultra');
+        if (slotCount > 28) {
+            scoreboardTable.classList.add('density-ultra');
+        } else if (slotCount > 18) {
+            scoreboardTable.classList.add('density-dense');
+        } else if (slotCount > 10) {
+            scoreboardTable.classList.add('density-compact');
+        }
+
+        let headerHtml = `<th class="label-col">Încercare</th>`;
+        let dataHtml = `<td class="label-col">Rezultat (ms)</td>`;
+
+        const minScore = scores.length > 0 ? Math.min(...scores) : null;
+
+        for (let i = 1; i <= slotCount; i++) {
+            headerHtml += `<th>${i}</th>`;
+
+            if (i <= scores.length) {
+                const val = Math.round(scores[i - 1]);
+                const isBest = (scores[i - 1] === minScore);
+                const isLatest = (i === scores.length);
+                const classes = [];
+                if (isBest) classes.push('highlight-best');
+                if (isLatest) classes.push('active-cell');
+                dataHtml += `<td class="${classes.join(' ')}">${val}</td>`;
+            } else if (i === scores.length + 1) {
+                dataHtml += `<td class="active-cell">-</td>`;
+            } else {
+                dataHtml += `<td>-</td>`;
+            }
+        }
+
+        scoreboardTheadRow.innerHTML = headerHtml;
+        scoreboardTbodyRow.innerHTML = dataHtml;
+
+        if (scoreboardCard.scrollWidth > scoreboardCard.clientWidth) {
+            scoreboardCard.scrollLeft = scoreboardCard.scrollWidth;
+        }
+
+        if (scores.length > 0) {
+            const min = Math.min(...scores);
+            const max = Math.max(...scores);
+            const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+
+            statCount.textContent = `${scores.length}`;
+            statBest.textContent = `${Math.round(min)} ms`;
+            statWorst.textContent = `${Math.round(max)} ms`;
+            statAvg.textContent = `${Math.round(avg)} ms`;
+        } else {
+            statCount.textContent = `0`;
+            statBest.textContent = `-- ms`;
+            statWorst.textContent = `-- ms`;
+            statAvg.textContent = `-- ms`;
+        }
+    }
+
+    function refreshCurrentView() {
+        if (state === 'idle') renderIdle();
+        else if (state === 'waiting') renderWaiting();
+        else if (state === 'early') renderEarly();
+        else if (state === 'result' && scores.length > 0) renderResult(scores[scores.length - 1]);
+    }
+
+    function renderIdle() {
+        state = 'idle';
+        arena.className = 'reaction-arena state-idle' + (currentScalePct <= 25 ? ' is-micro' : '');
+
+        if (currentScalePct <= 25) {
+            arenaContent.innerHTML = `
+                <div class="micro-indicator-icon">🎯</div>
+                <div class="arena-title" style="font-size: 0.9rem;">START</div>
+            `;
+        } else {
+            arenaContent.innerHTML = `
+                <div class="arena-title">Click pentru Start</div>
+                <div class="arena-subtitle">Când fundalul devine VERDE, apasă mouse-ul sau tasta SPAȚIU cât mai rapid posibil.</div>
+                <div class="action-hint">Apasă oriunde pe ecran</div>
+            `;
+        }
+    }
+
+    function renderWaiting() {
+        state = 'waiting';
+        arena.className = 'reaction-arena state-wait' + (currentScalePct <= 25 ? ' is-micro' : '');
+
+        if (currentScalePct <= 25) {
+            arenaContent.innerHTML = `
+                <div class="micro-indicator-icon">⏳</div>
+                <div class="arena-title" style="font-size: 0.85rem;">AȘTEAPTĂ</div>
+            `;
+        } else {
+            arenaContent.innerHTML = `
+                <div class="arena-title">ATENȚIE</div>
+                <div class="arena-subtitle">Așteaptă culoarea verde... Nu apăsa dinainte!</div>
+            `;
+        }
+    }
+
+    function renderEarly() {
+        state = 'early';
+        if (timerTimeoutId) clearTimeout(timerTimeoutId);
+        arena.className = 'reaction-arena state-early' + (currentScalePct <= 25 ? ' is-micro' : '');
+
+        if (currentScalePct <= 25) {
+            arenaContent.innerHTML = `
+                <div class="micro-indicator-icon">❌</div>
+                <div class="arena-title" style="font-size: 0.85rem;">RESET</div>
+            `;
+        } else {
+            arenaContent.innerHTML = `
+                <div class="arena-title">PREA DEVREME!</div>
+                <div class="arena-subtitle">Ai apăsat înainte ca ecranul să devină verde. Încercarea a fost anulată.</div>
+                <div class="action-hint">Click sau Spațiu pentru a reîncerca</div>
+            `;
+        }
+    }
+
+    function renderResult(currentMs) {
+        state = 'result';
+        arena.className = 'reaction-arena state-result' + (currentScalePct <= 25 ? ' is-micro' : '');
+
+        const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+        const currentRounded = Math.round(currentMs);
+
+        if (currentScalePct <= 25) {
+            // Direct clean result on the target itself!
+            arenaContent.innerHTML = `
+                <div class="arena-title" style="font-size: 1.15rem; font-weight:800; color:#4ade80;">${currentRounded}</div>
+                <div style="font-size: 0.65rem; opacity:0.85; margin-top:2px;">URMĂTORUL</div>
+            `;
+        } else {
+            // Full puerman.net split layout directly inside arena
+            arenaContent.innerHTML = `
+                <div class="puerman-result-layout" style="margin-bottom: 18px;">
+                    <div class="puerman-col left">
+                        <div class="puerman-meta">
+                            <div>Încercarea ${scores.length}</div>
+                            <div>Timp Mediu</div>
+                        </div>
+                        <div class="puerman-number-avg">${avg}</div>
+                    </div>
+                    <div class="puerman-col right">
+                        <div class="puerman-number-current">
+                            ${currentRounded} <span class="puerman-unit">ms</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-hint">
+                    Click sau apasă Spațiu pentru încercarea ${scores.length + 1}
+                </div>
+            `;
+        }
+    }
+
+    function triggerGo() {
+        requestAnimationFrame(() => {
+            arena.className = 'reaction-arena state-go' + (currentScalePct <= 25 ? ' is-micro' : '');
+            
+            if (currentScalePct <= 25) {
+                arenaContent.innerHTML = `
+                    <div class="arena-title" style="font-size: 1rem; font-weight:800;">CLICK!</div>
+                `;
+            } else {
+                arenaContent.innerHTML = `
+                    <div class="arena-title">CLICK ACUM!</div>
+                    <div class="arena-subtitle">Apasă mouse-ul sau tasta Spațiu!</div>
+                `;
+            }
+            
+            requestAnimationFrame((presentationTimestamp) => {
+                stimulusStartTime = presentationTimestamp;
+                state = 'go';
+            });
+        });
+    }
+
+    function startRound() {
+        if (currentScalePct <= 25 && chkRandomPos.checked) {
+            positionTargetRandomly();
+        }
+
+        renderWaiting();
+        const delay = getRandomDelay(1600, 4200);
+
+        timerTimeoutId = setTimeout(() => {
+            if (state === 'waiting') {
+                triggerGo();
+            }
+        }, delay);
+    }
+
+    function handleUserInput(event) {
+        if (event.type === 'keydown' && (event.code !== 'Space' || event.repeat)) {
+            return;
+        }
+
+        if (event.type === 'keydown' && event.code === 'Space') {
+            event.preventDefault();
+        }
+
+        const inputTimestamp = event.timeStamp;
+
+        if (state === 'idle') {
+            startRound();
+        } else if (state === 'waiting') {
+            renderEarly();
+        } else if (state === 'early') {
+            startRound();
+        } else if (state === 'go') {
+            state = 'recording';
+            const reactionTime = Math.max(1, inputTimestamp - stimulusStartTime);
+            scores.push(reactionTime);
+            updateScoreboard();
+            renderResult(reactionTime);
+        } else if (state === 'result') {
+            startRound();
+        }
+    }
+
+    function resetAll() {
+        if (timerTimeoutId) clearTimeout(timerTimeoutId);
+        scores = [];
+        updateScoreboard();
+        renderIdle();
+    }
+
+    arena.addEventListener('pointerdown', (e) => {
+        if (e.button === 0) {
+            handleUserInput(e);
+        }
+    });
+
+    window.addEventListener('keydown', handleUserInput);
+    btnReset.addEventListener('click', resetAll);
+
+    // Initial load
+    updateScoreboard();
+    applyScale(70);
+</script>
+
+</body>
+</html>
