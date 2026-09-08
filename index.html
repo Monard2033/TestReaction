@@ -9,22 +9,32 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #0a0e17;
-            --card-bg: #141b26;
-            --border-color: #263244;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
+            /* UNA MD Dark Theme Background & Aesthetics (identical to installunamd.unisim-soft.com) */
+            --ink: #0b0c0b;
+            --ink-2: #131418;
+            --ink-3: #191b21;
+            --bg-glow: radial-gradient(800px 500px at 78% -8%, rgba(255, 150, 60, 0.16), transparent 60%),
+                       radial-gradient(700px 600px at -5% 12%, rgba(80, 200, 255, 0.07), transparent 55%);
+            --grid-line: rgba(255, 255, 255, 0.085);
+            --grid-op: 0.5;
+
+            --bg-body: var(--ink);
+            --card-bg: rgba(19, 20, 24, 0.85);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #ecebe5;
+            --text-secondary: #92938c;
             
             /* State Colors */
-            --color-idle: #3e4c5f;
+            --color-idle: #27303f;
             --color-wait: #b91c1c;
             --color-go: #16a34a;
-            --color-result: #2b3648;
+            --color-result: #1e2430;
             --color-early: #881337;
 
-            /* Dynamic continuous scaling variable for arena */
-            --arena-max-w: 960px;
+            /* Dynamic continuous scaling variables */
+            --arena-max-w: 70vw;
             --scoreboard-max-w: 960px;
+            --toolbar-max-w: 70vw;
         }
 
         * {
@@ -38,7 +48,7 @@
 
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-body);
+            background: var(--ink);
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
@@ -49,6 +59,34 @@
             overflow-x: hidden;
             touch-action: manipulation;
             transition: padding 0.2s ease;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient Glow Layer */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            background: var(--bg-glow), var(--ink);
+        }
+
+        /* High-Tech Grid Layer with Radial Masking */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: var(--grid-op);
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 46px 46px;
+            -webkit-mask-image: radial-gradient(circle at 50% 0%, #000 40%, transparent 85%);
+            mask-image: radial-gradient(circle at 50% 0%, #000 40%, transparent 85%);
         }
 
         body.is-immersive {
@@ -75,7 +113,7 @@
             margin: 0 auto;
         }
 
-        /* Fixed Anchor Elements: NEVER shift horizontally while dragging the slider! */
+        /* Header, Toolbar, and Controls align with arena */
         header,
         .toolbar-card,
         .controls-row {
@@ -152,6 +190,42 @@
             50% { opacity: 0.4; transform: scale(0.85); }
         }
 
+        /* Language Selector */
+        .lang-selector {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(19, 20, 24, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 9999px;
+            padding: 2px 3px;
+            gap: 2px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .btn-lang {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-lang:hover {
+            color: #ffffff;
+        }
+
+        .btn-lang.active {
+            background: #0284c7;
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(2, 132, 199, 0.45);
+        }
+
         /* Sizing Toolbar (Rock-solid anchor position) */
         .toolbar-card {
             background-color: var(--card-bg);
@@ -164,6 +238,8 @@
             align-items: center;
             gap: 12px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
         }
 
         .toolbar-group {
@@ -285,6 +361,8 @@
             overflow-x: auto;
             scrollbar-width: thin;
             scrollbar-color: #38bdf8 #1a2332;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
         }
 
         .scoreboard-card::-webkit-scrollbar {
@@ -588,6 +666,8 @@
             border-radius: 10px;
             padding: 12px;
             text-align: center;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
         }
 
         .stat-label {
@@ -688,10 +768,15 @@
     <div id="content-wrap" class="content-wrap">
         <header>
             <div class="title-group">
-                <h1>Test Viteză de Reacție</h1>
-                <p>Măsurare ultra-precisă a latenței neuromusculare (Hardware Input Timestamp)</p>
+                <h1 id="i18n-title">Test Viteză de Reacție</h1>
+                <p id="i18n-subtitle" style="color: var(--text-secondary); font-size: 0.82rem; margin-top: 2px;">Măsurare ultra-precisă a latenței neuromusculare</p>
             </div>
             <div class="header-badges">
+                <div class="lang-selector" id="lang-selector">
+                    <button class="btn-lang active" data-lang="ro">RO</button>
+                    <button class="btn-lang" data-lang="en">EN</button>
+                    <button class="btn-lang" data-lang="ru">RU</button>
+                </div>
                 <div class="badge-precision">
                     <span class="dot"></span>
                     0-DELAY ENGINE
@@ -702,7 +787,7 @@
         <!-- Sizing & Micro-Mode Toolbar (Centered at stable 960px max-width, never shifts while dragging!) -->
         <div class="toolbar-card">
             <div class="toolbar-group">
-                <span class="toolbar-label">
+                <span class="toolbar-label" id="i18n-size-label">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="15 3 21 3 21 9"></polyline>
                         <polyline points="9 21 3 21 3 15"></polyline>
@@ -718,21 +803,21 @@
                 <div class="preset-buttons">
                     <button class="btn-preset" data-pct="10">🎯 10% Micro</button>
                     <button class="btn-preset" data-pct="25">25%</button>
-                    <button class="btn-preset active" data-pct="70">70% Normal</button>
+                    <button class="btn-preset active" id="i18n-preset-normal" data-pct="70">70% Normal</button>
                     <button class="btn-preset" data-pct="95">⚡ 95% Max</button>
                 </div>
             </div>
 
             <div class="toolbar-group">
-                <label class="toggle-option" title="La 10%-25%, ținta se mută în poziții aleatorii la fiecare rundă pentru antrenament flick reflex">
+                <label class="toggle-option" id="i18n-random-wrap" title="La 10%-25%, ținta se mută în poziții aleatorii la fiecare rundă pentru antrenament flick reflex">
                     <input type="checkbox" id="chk-random-pos">
-                    <span>Poziție aleatorie (Flick Reflex)</span>
+                    <span id="i18n-random-label">Poziție aleatorie (Flick Reflex)</span>
                 </label>
                 <button id="btn-fullscreen" class="btn-action" style="padding: 5px 10px; font-size: 0.78rem;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
                     </svg>
-                    Ecran Complet
+                    <span id="i18n-btn-fullscreen">Ecran Complet</span>
                 </button>
             </div>
         </div>
@@ -763,19 +848,19 @@
         <!-- Dashboard Bar -->
         <div class="dashboard-bar">
             <div class="stat-card">
-                <div class="stat-label">Încercări Finalizate</div>
+                <div class="stat-label" id="i18n-stat-count">Încercări Finalizate</div>
                 <div class="stat-val" id="stat-count">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Cel Mai Rapid (Best)</div>
+                <div class="stat-label" id="i18n-stat-best">Cel Mai Rapid (Best)</div>
                 <div class="stat-val val-best" id="stat-best">-- ms</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Media Sesiunii (Avg)</div>
+                <div class="stat-label" id="i18n-stat-avg">Media Sesiunii (Avg)</div>
                 <div class="stat-val" id="stat-avg">-- ms</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Cel Mai Lent (Worst)</div>
+                <div class="stat-label" id="i18n-stat-worst">Cel Mai Lent (Worst)</div>
                 <div class="stat-val val-worst" id="stat-worst">-- ms</div>
             </div>
         </div>
@@ -786,9 +871,9 @@
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
                     <path d="M3 3v5h5"/>
                 </svg>
-                Resetează Sesiunea
+                <span id="i18n-btn-reset">Resetează Sesiunea</span>
             </button>
-            <div class="hint-keyboard">
+            <div class="hint-keyboard" id="i18n-hint-keyboard">
                 Control: <kbd>Click Stânga</kbd> sau <kbd>Bara de Spațiu</kbd>
             </div>
         </div>
@@ -832,8 +917,243 @@
     let stimulusStartTime = 0;
     let currentScalePct = 70;
 
-    // --- Dynamic Sizing Logic (Zero Slider Shift) ---
-    function applyScale(pct) {
+    // --- Multi-Language Support (RO / EN / RU) ---
+    const I18N = {
+        ro: {
+            title: "Test Viteză de Reacție",
+            subtitle: "Măsurare ultra-precisă a latenței neuromusculare",
+            sizeLabel: "Dimensiune:",
+            normalPreset: "70% Normal",
+            randomPos: "Poziție aleatorie (Flick Reflex)",
+            randomPosTitle: "La 10%-25%, ținta se mută în poziții aleatorii la fiecare rundă pentru antrenament flick reflex",
+            fullscreen: "Ecran Complet",
+            exitFullscreen: "Ieși Ecran Complet",
+            colAttempt: "Încercare",
+            colResult: "Rezultat (ms)",
+            idleTitle: "Click pentru Start",
+            idleSub: "Când fundalul devine VERDE, apasă mouse-ul sau tasta SPAȚIU cât mai rapid posibil.",
+            idleHint: "Apasă oriunde pe ecran",
+            waitTitle: "ATENȚIE",
+            waitSub: "Așteaptă culoarea verde... Nu apăsa dinainte!",
+            waitMicro: "AȘTEAPTĂ",
+            earlyTitle: "PREA DEVREME!",
+            earlySub: "Ai apăsat înainte ca ecranul să devină verde. Încercarea a fost anulată.",
+            earlyHint: "Click sau Spațiu pentru a reîncerca",
+            goTitle: "CLICK ACUM!",
+            goSub: "Apasă mouse-ul sau tasta Spațiu!",
+            resAttempt: "Încercarea",
+            resAvg: "Timp Mediu",
+            resHint: "Click sau apasă Spațiu pentru încercarea",
+            resMicroNext: "URMĂTORUL",
+            statCount: "Încercări Finalizate",
+            statBest: "Cel Mai Rapid (Best)",
+            statAvg: "Media Sesiunii (Avg)",
+            statWorst: "Cel Mai Lent (Worst)",
+            btnReset: "Resetează Sesiunea",
+            hintKeyboard: `Control: <kbd>Click Stânga</kbd> sau <kbd>Bara de Spațiu</kbd>`
+        },
+        en: {
+            title: "Reaction Time Test",
+            subtitle: "Ultra-precise neuromuscular latency measurement",
+            sizeLabel: "Size:",
+            normalPreset: "70% Normal",
+            randomPos: "Random Position (Flick Reflex)",
+            randomPosTitle: "At 10%-25%, the target moves to random locations each round for flick reflex training",
+            fullscreen: "Fullscreen",
+            exitFullscreen: "Exit Fullscreen",
+            colAttempt: "Attempt",
+            colResult: "Result (ms)",
+            idleTitle: "Click to Start",
+            idleSub: "When the background turns GREEN, click the mouse or press SPACE as quickly as possible.",
+            idleHint: "Click anywhere on screen",
+            waitTitle: "WAIT FOR GREEN",
+            waitSub: "Wait for green... Do not click early!",
+            waitMicro: "WAIT",
+            earlyTitle: "TOO EARLY!",
+            earlySub: "You clicked before the screen turned green. The attempt was canceled.",
+            earlyHint: "Click or press Space to retry",
+            goTitle: "CLICK NOW!",
+            goSub: "Press mouse or Spacebar!",
+            resAttempt: "Attempt",
+            resAvg: "Average Time",
+            resHint: "Click or press Space for attempt",
+            resMicroNext: "NEXT",
+            statCount: "Completed Attempts",
+            statBest: "Fastest (Best)",
+            statAvg: "Session Average (Avg)",
+            statWorst: "Slowest (Worst)",
+            btnReset: "Reset Session",
+            hintKeyboard: `Controls: <kbd>Left Click</kbd> or <kbd>Spacebar</kbd>`
+        },
+        ru: {
+            title: "Тест скорости реакции",
+            subtitle: "Сверхточное измерение нейромышечной задержки (Hardware Input Timestamp)",
+            sizeLabel: "Размер:",
+            normalPreset: "70% Обычный",
+            randomPos: "Случайная позиция (Флик-рефлекс)",
+            randomPosTitle: "При 10%-25% цель перемещается в случайные позиции для тренировки флик-рефлексов",
+            fullscreen: "Полный экран",
+            exitFullscreen: "Выйти из полноэкранного",
+            colAttempt: "Попытка",
+            colResult: "Результат (мс)",
+            idleTitle: "Нажмите для старта",
+            idleSub: "Когда фон станет ЗЕЛЕНЫМ, нажмите мышь или ПРОБЕЛ как можно быстрее.",
+            idleHint: "Нажмите в любом месте экрана",
+            waitTitle: "ЖДИТЕ ЗЕЛЕНЫЙ",
+            waitSub: "Ждите зеленый цвет... Не нажимайте заранее!",
+            waitMicro: "ЖДИТЕ",
+            earlyTitle: "СЛИШКОМ РАНО!",
+            earlySub: "Вы нажали до того, как экран стал зеленым. Попытка отменена.",
+            earlyHint: "Нажмите мышь или Пробел для повтора",
+            goTitle: "КЛИКАЙТЕ СЕЙЧАС!",
+            goSub: "Нажмите мышь или клавишу Пробел!",
+            resAttempt: "Попытка",
+            resAvg: "Среднее время",
+            resHint: "Нажмите мышь или Пробел для попытки",
+            resMicroNext: "СЛЕДУЮЩИЙ",
+            statCount: "Завершено попыток",
+            statBest: "Самый быстрый (Best)",
+            statAvg: "Среднее по сессии (Avg)",
+            statWorst: "Самый медленный (Worst)",
+            btnReset: "Сбросить сессию",
+            hintKeyboard: `Управление: <kbd>ЛКМ</kbd> или <kbd>Пробел</kbd>`
+        }
+    };
+
+    let currentLang = 'ro';
+
+    function setLanguage(lang) {
+        if (!I18N[lang]) return;
+        currentLang = lang;
+        document.documentElement.lang = lang;
+
+        // Update active language button
+        document.querySelectorAll('.btn-lang').forEach(btn => {
+            if (btn.dataset.lang === lang) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        const t = I18N[lang];
+
+        // Header
+        const elTitle = document.getElementById('i18n-title');
+        const elSub = document.getElementById('i18n-subtitle');
+        if (elTitle) elTitle.textContent = t.title;
+        if (elSub) elSub.textContent = t.subtitle;
+
+        // Toolbar
+        const elSizeLabel = document.getElementById('i18n-size-label');
+        if (elSizeLabel) {
+            elSizeLabel.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+                ${t.sizeLabel}
+            `;
+        }
+
+        const elPresetNormal = document.getElementById('i18n-preset-normal');
+        if (elPresetNormal) elPresetNormal.textContent = t.normalPreset;
+
+        const elRandomLabel = document.getElementById('i18n-random-label');
+        if (elRandomLabel) elRandomLabel.textContent = t.randomPos;
+
+        const elRandomWrap = document.getElementById('i18n-random-wrap');
+        if (elRandomWrap) elRandomWrap.title = t.randomPosTitle;
+
+        updateFullscreenButton();
+
+        // Dashboard
+        const elStatCount = document.getElementById('i18n-stat-count');
+        const elStatBest = document.getElementById('i18n-stat-best');
+        const elStatAvg = document.getElementById('i18n-stat-avg');
+        const elStatWorst = document.getElementById('i18n-stat-worst');
+        if (elStatCount) elStatCount.textContent = t.statCount;
+        if (elStatBest) elStatBest.textContent = t.statBest;
+        if (elStatAvg) elStatAvg.textContent = t.statAvg;
+        if (elStatWorst) elStatWorst.textContent = t.statWorst;
+
+        // Footer
+        const elBtnReset = document.getElementById('i18n-btn-reset');
+        if (elBtnReset) elBtnReset.textContent = t.btnReset;
+
+        const elHintKb = document.getElementById('i18n-hint-keyboard');
+        if (elHintKb) elHintKb.innerHTML = t.hintKeyboard;
+
+        // Refresh views
+        updateScoreboard();
+        refreshCurrentView();
+        saveConfig();
+    }
+
+    function updateFullscreenButton() {
+        const t = I18N[currentLang] || I18N.ro;
+        const isFs = Boolean(document.fullscreenElement);
+        const elBtnFs = document.getElementById('i18n-btn-fullscreen');
+        if (elBtnFs) {
+            elBtnFs.textContent = isFs ? t.exitFullscreen : t.fullscreen;
+        }
+    }
+
+    // --- Local Persistence (Cache / localStorage) ---
+    const STORAGE_KEY = 'reaction_test_config';
+
+    function loadSavedConfig() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const config = JSON.parse(raw);
+                if (config.scale !== undefined) {
+                    const parsed = parseInt(config.scale, 10);
+                    if (!isNaN(parsed) && parsed >= 10 && parsed <= 95) {
+                        currentScalePct = parsed;
+                    }
+                }
+                if (config.randomPos !== undefined) {
+                    chkRandomPos.checked = Boolean(config.randomPos);
+                }
+                if (config.lang && ['ro', 'en', 'ru'].includes(config.lang)) {
+                    currentLang = config.lang;
+                } else {
+                    detectBrowserLanguage();
+                }
+            } else {
+                detectBrowserLanguage();
+            }
+        } catch (e) {
+            console.warn('Nu s-au putut încărca preferințele din cache:', e);
+            detectBrowserLanguage();
+        }
+    }
+
+    function detectBrowserLanguage() {
+        const userLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+        if (userLang.startsWith('ru')) currentLang = 'ru';
+        else if (userLang.startsWith('ro') || userLang.startsWith('mo')) currentLang = 'ro';
+        else currentLang = 'en';
+    }
+
+    function saveConfig() {
+        try {
+            const config = {
+                scale: currentScalePct,
+                randomPos: chkRandomPos.checked,
+                lang: currentLang
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+        } catch (e) {
+            console.warn('Nu s-au putut salva preferințele în cache:', e);
+        }
+    }
+
+    // --- Dynamic Sizing Logic (Zero Slider Shift + Perfect Alignment) ---
+    function applyScale(pct, updateToolbar = true) {
         currentScalePct = parseInt(pct, 10);
         sizeSlider.value = currentScalePct;
         sizeBadge.textContent = `${currentScalePct}%`;
@@ -853,6 +1173,9 @@
 
             document.documentElement.style.setProperty('--arena-max-w', '960px');
             document.documentElement.style.setProperty('--scoreboard-max-w', '960px');
+            if (updateToolbar) {
+                document.documentElement.style.setProperty('--toolbar-max-w', '960px');
+            }
 
             // Target circle size scales continuously: 10% -> 60px, 25% -> 150px
             const targetSize = Math.round(60 + ((currentScalePct - 10) / 15) * 90);
@@ -879,6 +1202,11 @@
             // Scoreboard & dashboard expand with arena when >960px, but stay comfortably at 960px when smaller
             const scoreWidthPx = Math.max(960, arenaWidthPx);
             document.documentElement.style.setProperty('--scoreboard-max-w', `min(96vw, ${scoreWidthPx}px)`);
+
+            if (updateToolbar) {
+                const toolbarWidthPx = Math.max(760, arenaWidthPx);
+                document.documentElement.style.setProperty('--toolbar-max-w', `min(96vw, ${toolbarWidthPx}px)`);
+            }
 
             const heightPx = Math.round(300 + ((currentScalePct - 25) / 70) * (window.innerHeight * 0.44));
             arena.style.width = '100%';
@@ -919,13 +1247,24 @@
         arena.style.transform = 'none';
     }
 
-    sizeSlider.addEventListener('input', (e) => applyScale(e.target.value));
+    sizeSlider.addEventListener('input', (e) => {
+        applyScale(e.target.value, false);
+    });
+
+    sizeSlider.addEventListener('change', (e) => {
+        applyScale(e.target.value, true);
+        saveConfig();
+    });
 
     presetButtons.forEach(btn => {
-        btn.addEventListener('click', () => applyScale(btn.dataset.pct));
+        btn.addEventListener('click', () => {
+            applyScale(btn.dataset.pct, true);
+            saveConfig();
+        });
     });
 
     chkRandomPos.addEventListener('change', () => {
+        saveConfig();
         if (currentScalePct <= 25) {
             if (chkRandomPos.checked) {
                 positionTargetRandomly();
@@ -936,30 +1275,27 @@
     });
 
     window.addEventListener('resize', () => {
-        applyScale(currentScalePct);
+        applyScale(currentScalePct, true);
     });
 
     btnFullscreen.addEventListener('click', () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(() => {});
             document.body.classList.add('is-immersive');
-            btnFullscreen.textContent = 'Ieși Ecran Complet';
         } else {
             document.exitFullscreen().catch(() => {});
             document.body.classList.remove('is-immersive');
-            btnFullscreen.textContent = 'Ecran Complet';
         }
+        setTimeout(updateFullscreenButton, 100);
     });
 
     document.addEventListener('fullscreenchange', () => {
         if (!document.fullscreenElement) {
             document.body.classList.remove('is-immersive');
-            btnFullscreen.innerHTML = `
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-                </svg> Ecran Complet
-            `;
+        } else {
+            document.body.classList.add('is-immersive');
         }
+        updateFullscreenButton();
     });
 
     // --- Scoreboard Engine ---
@@ -979,8 +1315,9 @@
             scoreboardTable.classList.add('density-compact');
         }
 
-        let headerHtml = `<th class="label-col">Încercare</th>`;
-        let dataHtml = `<td class="label-col">Rezultat (ms)</td>`;
+        const t = I18N[currentLang] || I18N.ro;
+        let headerHtml = `<th class="label-col">${t.colAttempt}</th>`;
+        let dataHtml = `<td class="label-col">${t.colResult}</td>`;
 
         const minScore = scores.length > 0 ? Math.min(...scores) : null;
 
@@ -1036,6 +1373,7 @@
     function renderIdle() {
         state = 'idle';
         arena.className = 'reaction-arena state-idle' + (currentScalePct <= 25 ? ' is-micro' : '');
+        const t = I18N[currentLang] || I18N.ro;
 
         if (currentScalePct <= 25) {
             arenaContent.innerHTML = `
@@ -1044,9 +1382,9 @@
             `;
         } else {
             arenaContent.innerHTML = `
-                <div class="arena-title">Click pentru Start</div>
-                <div class="arena-subtitle">Când fundalul devine VERDE, apasă mouse-ul sau tasta SPAȚIU cât mai rapid posibil.</div>
-                <div class="action-hint">Apasă oriunde pe ecran</div>
+                <div class="arena-title">${t.idleTitle}</div>
+                <div class="arena-subtitle">${t.idleSub}</div>
+                <div class="action-hint">${t.idleHint}</div>
             `;
         }
     }
@@ -1054,16 +1392,17 @@
     function renderWaiting() {
         state = 'waiting';
         arena.className = 'reaction-arena state-wait' + (currentScalePct <= 25 ? ' is-micro' : '');
+        const t = I18N[currentLang] || I18N.ro;
 
         if (currentScalePct <= 25) {
             arenaContent.innerHTML = `
                 <div class="micro-indicator-icon">⏳</div>
-                <div class="arena-title" style="font-size: 0.85rem;">AȘTEAPTĂ</div>
+                <div class="arena-title" style="font-size: 0.85rem;">${t.waitMicro}</div>
             `;
         } else {
             arenaContent.innerHTML = `
-                <div class="arena-title">ATENȚIE</div>
-                <div class="arena-subtitle">Așteaptă culoarea verde... Nu apăsa dinainte!</div>
+                <div class="arena-title">${t.waitTitle}</div>
+                <div class="arena-subtitle">${t.waitSub}</div>
             `;
         }
     }
@@ -1072,6 +1411,7 @@
         state = 'early';
         if (timerTimeoutId) clearTimeout(timerTimeoutId);
         arena.className = 'reaction-arena state-early' + (currentScalePct <= 25 ? ' is-micro' : '');
+        const t = I18N[currentLang] || I18N.ro;
 
         if (currentScalePct <= 25) {
             arenaContent.innerHTML = `
@@ -1080,9 +1420,9 @@
             `;
         } else {
             arenaContent.innerHTML = `
-                <div class="arena-title">PREA DEVREME!</div>
-                <div class="arena-subtitle">Ai apăsat înainte ca ecranul să devină verde. Încercarea a fost anulată.</div>
-                <div class="action-hint">Click sau Spațiu pentru a reîncerca</div>
+                <div class="arena-title">${t.earlyTitle}</div>
+                <div class="arena-subtitle">${t.earlySub}</div>
+                <div class="action-hint">${t.earlyHint}</div>
             `;
         }
     }
@@ -1090,6 +1430,7 @@
     function renderResult(currentMs) {
         state = 'result';
         arena.className = 'reaction-arena state-result' + (currentScalePct <= 25 ? ' is-micro' : '');
+        const t = I18N[currentLang] || I18N.ro;
 
         const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
         const currentRounded = Math.round(currentMs);
@@ -1097,15 +1438,15 @@
         if (currentScalePct <= 25) {
             arenaContent.innerHTML = `
                 <div class="arena-title" style="font-size: 1.15rem; font-weight:800; color:#4ade80;">${currentRounded}</div>
-                <div style="font-size: 0.65rem; opacity:0.85; margin-top:2px;">URMĂTORUL</div>
+                <div style="font-size: 0.65rem; opacity:0.85; margin-top:2px;">${t.resMicroNext}</div>
             `;
         } else {
             arenaContent.innerHTML = `
                 <div class="puerman-result-layout" style="margin-bottom: 18px;">
                     <div class="puerman-col left">
                         <div class="puerman-meta">
-                            <div>Încercarea ${scores.length}</div>
-                            <div>Timp Mediu</div>
+                            <div>${t.resAttempt} ${scores.length}</div>
+                            <div>${t.resAvg}</div>
                         </div>
                         <div class="puerman-number-avg">${avg}</div>
                     </div>
@@ -1116,7 +1457,7 @@
                     </div>
                 </div>
                 <div class="action-hint">
-                    Click sau apasă Spațiu pentru încercarea ${scores.length + 1}
+                    ${t.resHint} ${scores.length + 1}
                 </div>
             `;
         }
@@ -1125,6 +1466,7 @@
     function triggerGo() {
         requestAnimationFrame(() => {
             arena.className = 'reaction-arena state-go' + (currentScalePct <= 25 ? ' is-micro' : '');
+            const t = I18N[currentLang] || I18N.ro;
             
             if (currentScalePct <= 25) {
                 arenaContent.innerHTML = `
@@ -1132,8 +1474,8 @@
                 `;
             } else {
                 arenaContent.innerHTML = `
-                    <div class="arena-title">CLICK ACUM!</div>
-                    <div class="arena-subtitle">Apasă mouse-ul sau tasta Spațiu!</div>
+                    <div class="arena-title">${t.goTitle}</div>
+                    <div class="arena-subtitle">${t.goSub}</div>
                 `;
             }
             
@@ -1203,9 +1545,17 @@
     window.addEventListener('keydown', handleUserInput);
     btnReset.addEventListener('click', resetAll);
 
-    // Initial load
-    updateScoreboard();
-    applyScale(70);
+    // Language button listeners
+    document.querySelectorAll('.btn-lang').forEach(btn => {
+        btn.addEventListener('click', () => {
+            setLanguage(btn.dataset.lang);
+        });
+    });
+
+    // Initial load with cache restoration
+    loadSavedConfig();
+    setLanguage(currentLang);
+    applyScale(currentScalePct, true);
 </script>
 
 </body>
