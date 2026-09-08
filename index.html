@@ -2,8 +2,8 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Test Viteză de Reacție - Scalabil & Sesiune Continuă</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Reaction Speed Test</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -31,10 +31,9 @@
             --color-result: #1e2430;
             --color-early: #881337;
 
-            /* Dynamic continuous scaling variables */
+            /* Dynamic adjustable arena width & calculated height */
             --arena-max-w: 70vw;
-            --scoreboard-max-w: 960px;
-            --toolbar-max-w: 70vw;
+            --arena-calculated-height: 560px;
         }
 
         * {
@@ -44,6 +43,7 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -51,11 +51,12 @@
             background: var(--ink);
             color: var(--text-primary);
             min-height: 100vh;
+            min-height: 100dvh;
+            padding: 10px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding: 16px;
             overflow-x: hidden;
             touch-action: manipulation;
             transition: padding 0.2s ease;
@@ -99,38 +100,35 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
         }
 
-        /* Central wrapper with aligned children */
+        /* Central wrapper with unified aligned children */
         .content-wrap {
             width: 100%;
             max-width: 100vw;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
             margin: 0 auto;
         }
 
-        /* Header, Toolbar, and Controls align with arena */
+        /* Static 70vw Frame: Header and Toolbar (control panel remains rock-solid) */
         header,
-        .toolbar-card,
-        .controls-row {
+        .toolbar-card {
             width: 100%;
             max-width: 70vw;
         }
 
-        /* Dynamic Scaling Elements: Arena, Scoreboard, and Dashboard */
+        /* Dynamic Interactive Canvas Experience: Scoreboard, Arena, Dashboard, and Controls */
         .scoreboard-card,
-        .dashboard-bar {
+        .arena-viewport-wrapper,
+        .dashboard-bar,
+        .controls-row {
             width: 100%;
-            max-width: var(--scoreboard-max-w, 960px);
-        }
-
-        .arena-viewport-wrapper {
-            width: 100%;
-            max-width: var(--arena-max-w, 960px);
+            max-width: var(--arena-max-w, 70vw);
+            transition: max-width 0.08s ease;
         }
 
         /* Header */
@@ -351,18 +349,21 @@
             height: 15px;
         }
 
-        /* Continuous Dynamic Scoreboard */
+        /* Continuous Dynamic Scoreboard with Touch Scrolling & Frozen Sticky Label */
         .scoreboard-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 12px 14px;
+            padding: 10px 0;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
             overflow-x: auto;
+            overscroll-behavior-x: contain;
+            -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
             scrollbar-color: #38bdf8 #1a2332;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
+            position: relative;
         }
 
         .scoreboard-card::-webkit-scrollbar {
@@ -375,29 +376,52 @@
         }
 
         .scoreboard-table {
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
+            min-width: 100%;
+            width: max-content;
+            table-layout: auto;
+            border-collapse: separate;
+            border-spacing: 0;
             font-family: 'JetBrains Mono', monospace;
             text-align: center;
             transition: all 0.15s ease;
         }
 
+        .scoreboard-table th:not(.label-col),
+        .scoreboard-table td:not(.label-col) {
+            min-width: 42px;
+            width: 42px;
+            padding: 6px 4px;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+
         .scoreboard-table .label-col {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: #131418;
             text-align: left;
             font-weight: 600;
             color: var(--text-secondary);
-            font-size: 0.82rem;
-            padding-right: 8px;
-            width: 100px;
+            font-size: 0.8rem;
+            padding-left: 14px;
+            padding-right: 10px;
+            min-width: 96px;
+            max-width: 110px;
             white-space: nowrap;
+            border-right: 1px solid var(--border-color);
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .scoreboard-table th.label-col {
+            border-bottom: 1px solid var(--border-color);
         }
 
         .scoreboard-table th {
             color: var(--text-secondary);
             font-size: 0.82rem;
             font-weight: 600;
-            padding: 5px 2px;
+            padding: 5px 4px;
             border-bottom: 1px solid var(--border-color);
             white-space: nowrap;
             transition: font-size 0.15s ease, padding 0.15s ease;
@@ -406,7 +430,7 @@
         .scoreboard-table td {
             font-size: 1rem;
             font-weight: 700;
-            padding: 8px 2px 3px 2px;
+            padding: 8px 4px 3px 4px;
             color: #cbd5e1;
             white-space: nowrap;
             transition: font-size 0.15s ease, padding 0.15s ease;
@@ -434,12 +458,12 @@
         }
 
         /* Density compacting classes */
-        .scoreboard-table.density-compact th { font-size: 0.75rem; padding: 4px 1px; }
-        .scoreboard-table.density-compact td { font-size: 0.9rem; padding: 6px 1px 2px 1px; }
+        .scoreboard-table.density-compact th { font-size: 0.75rem; padding: 4px 2px; }
+        .scoreboard-table.density-compact td { font-size: 0.9rem; padding: 6px 2px 2px 2px; }
         .scoreboard-table.density-compact .label-col { width: 88px; font-size: 0.77rem; }
 
-        .scoreboard-table.density-dense th { font-size: 0.68rem; padding: 3px 0; }
-        .scoreboard-table.density-dense td { font-size: 0.81rem; padding: 5px 0 2px 0; letter-spacing: -0.4px; }
+        .scoreboard-table.density-dense th { font-size: 0.68rem; padding: 3px 1px; }
+        .scoreboard-table.density-dense td { font-size: 0.81rem; padding: 5px 1px 2px 1px; letter-spacing: -0.4px; }
         .scoreboard-table.density-dense .label-col { width: 80px; font-size: 0.72rem; }
 
         .scoreboard-table.density-ultra th { font-size: 0.62rem; padding: 2px 0; }
@@ -452,14 +476,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 460px;
+            min-height: 160px;
         }
 
         .arena-viewport-wrapper.micro-playfield {
             background: rgba(20, 27, 38, 0.4);
             border: 1px dashed var(--border-color);
             border-radius: 18px;
-            height: 440px;
+            height: clamp(200px, 40vh, 320px);
             overflow: hidden;
         }
 
@@ -476,9 +500,11 @@
             box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
             will-change: background-color, transform;
             overflow: hidden;
+            touch-action: none;
 
             width: 100%;
-            height: 460px;
+            height: var(--arena-calculated-height, 500px);
+            min-height: 160px;
             border-radius: 18px;
             background-color: var(--color-idle);
         }
@@ -497,11 +523,17 @@
         .reaction-arena.state-result { background-color: var(--color-result); }
         .reaction-arena.state-early { background-color: var(--color-early); }
 
-        /* Micro Target Styling (10% - 25%) */
+        /* Micro Target Styling (10% - 25%) - Guaranteed 100% Round Sphere */
         .reaction-arena.is-micro {
             position: absolute;
-            border-radius: 50%;
+            min-height: unset !important;
+            aspect-ratio: 1 / 1 !important;
+            border-radius: 50% !important;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.15);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .reaction-arena.is-micro:active {
@@ -733,31 +765,512 @@
             color: #f1f5f9;
         }
 
+        /* ==========================================================================
+           1. TABLET / SMALL LAPTOP BREAKPOINT (<= 1024px)
+           ========================================================================== */
+        @media (max-width: 1024px) {
+            header,
+            .toolbar-card {
+                max-width: min(94vw, 920px);
+            }
+
+            .scoreboard-card,
+            .arena-viewport-wrapper,
+            .dashboard-bar,
+            .controls-row {
+                max-width: min(94vw, var(--arena-max-w, 920px));
+            }
+
+            .title-group h1 {
+                font-size: 1.4rem;
+            }
+
+            .slider-wrap input[type="range"] {
+                width: 120px;
+            }
+
+            .btn-preset {
+                padding: 5px 8px;
+                font-size: 0.74rem;
+            }
+
+            .reaction-arena:not(.is-micro) {
+                height: 300px;
+            }
+        }
+
+        /* ==========================================================================
+           2. TABLET PORTRAIT / PHABLET BREAKPOINT (<= 768px)
+           ========================================================================== */
         @media (max-width: 768px) {
+            body {
+                min-height: 100vh;
+                min-height: 100dvh;
+                padding: 12px 10px;
+            }
+
+            header,
+            .toolbar-card,
+            .scoreboard-card,
+            .arena-viewport-wrapper,
+            .dashboard-bar,
+            .controls-row {
+                max-width: 100% !important;
+            }
+
+            /* --- Header --- */
+            header {
+                padding: 4px 2px;
+                gap: 10px;
+            }
+
+            .title-group h1 {
+                font-size: 1.3rem;
+            }
+
+            .title-group p,
+            .title-group #i18n-subtitle {
+                font-size: 0.78rem !important;
+            }
+
+            /* --- Toolbar --- */
             .toolbar-card {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 12px;
+                padding: 12px 14px;
             }
+
             .toolbar-group {
+                width: 100%;
+                display: flex;
                 justify-content: space-between;
+                align-items: center;
+                gap: 10px;
             }
+
+            .toolbar-group:first-of-type {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .toolbar-label {
+                flex: 0 0 auto;
+            }
+
+            .slider-wrap {
+                flex: 1 1 auto;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .slider-wrap input[type="range"] {
+                flex: 1;
+                width: auto;
+                min-width: 80px;
+                height: 8px;
+            }
+
+            .preset-buttons {
+                width: 100%;
+                flex-basis: 100%;
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+            }
+
+            .btn-preset {
+                width: 100%;
+                text-align: center;
+                padding: 8px 4px;
+                font-size: 0.74rem;
+                min-height: 38px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .toolbar-group:last-of-type {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                padding-top: 8px;
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
+            }
+
+            #btn-fullscreen {
+                min-height: 38px;
+                padding: 6px 12px;
+            }
+
+            /* --- Arena --- */
+            .reaction-arena:not(.is-micro) {
+                height: auto !important;
+                min-height: 270px;
+                padding: 16px 10px;
+            }
+
             .puerman-result-layout {
                 grid-template-columns: 1fr;
-                gap: 16px;
+                gap: 12px;
             }
+
             .puerman-col.left {
                 border-right: none;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.15);
                 padding-right: 0;
-                padding-bottom: 12px;
+                padding-bottom: 10px;
                 justify-content: center;
             }
+
             .puerman-col.right {
                 padding-left: 0;
                 justify-content: center;
             }
+
+            /* --- Dashboard Bar --- */
             .dashboard-bar {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 10px 8px;
+            }
+
+            .stat-label {
+                font-size: 0.68rem;
+            }
+
+            .stat-val {
+                font-size: 1.15rem;
+            }
+        }
+
+        /* ==========================================================================
+           3. MOBILE PHONES BREAKPOINT (<= 480px, down to 360px)
+           ========================================================================== */
+        @media (max-width: 480px) {
+            body {
+                min-height: 100vh;
+                min-height: 100dvh;
+                padding: 10px 8px;
+                padding-top: max(10px, env(safe-area-inset-top));
+                padding-bottom: max(10px, env(safe-area-inset-bottom));
+                padding-left: max(8px, env(safe-area-inset-left));
+                padding-right: max(8px, env(safe-area-inset-right));
+            }
+
+            .container,
+            .content-wrap {
+                gap: 8px;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            header,
+            .toolbar-card,
+            .scoreboard-card,
+            .arena-viewport-wrapper,
+            .dashboard-bar,
+            .controls-row {
+                width: 100%;
+                max-width: 100% !important;
+            }
+
+            /* --- 1. Clean Two-Tier Header Layout --- */
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                padding: 2px 0;
+                width: 100%;
+            }
+
+            .title-group {
+                width: 100%;
+                text-align: left;
+            }
+
+            .title-group h1 {
+                font-size: clamp(1.2rem, 5.5vw, 1.38rem);
+                line-height: 1.15;
+                letter-spacing: -0.4px;
+                word-break: normal;
+            }
+
+            .title-group p,
+            .title-group #i18n-subtitle {
+                font-size: 0.74rem !important;
+                line-height: 1.35;
+                margin-top: 2px;
+                color: var(--text-secondary);
+            }
+
+            .header-badges {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .lang-selector {
+                padding: 2px 4px;
+                gap: 2px;
+            }
+
+            .btn-lang {
+                min-width: 28px;
+                min-height: 32px;
+                font-size: 0.72rem;
+                padding: 4px 8px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .badge-precision {
+                font-size: 0.65rem;
+                padding: 4px 8px;
+                letter-spacing: 0.2px;
+                white-space: nowrap;
+                min-height: 32px;
+            }
+
+            /* --- 2. Mobile Ergonomic Toolbar --- */
+            .toolbar-card {
+                padding: 10px 10px;
+                gap: 10px;
+                border-radius: 10px;
+                width: 100%;
+            }
+
+            .toolbar-group:first-of-type {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .toolbar-label {
+                font-size: 0.75rem;
+                flex: 0 0 auto;
+            }
+
+            .slider-wrap {
+                flex: 1 1 auto;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                min-width: 0;
+            }
+
+            .slider-wrap input[type="range"] {
+                flex: 1;
+                width: 100%;
+                min-width: 60px;
+                height: 10px;
+                border-radius: 5px;
+            }
+
+            .slider-wrap input[type="range"]::-webkit-slider-thumb {
+                width: 22px;
+                height: 22px;
+            }
+
+            .scale-badge {
+                font-size: 0.75rem;
+                padding: 2px 6px;
+                min-width: 42px;
+                flex: 0 0 auto;
+            }
+
+            /* 4-column equal grid for presets */
+            .preset-buttons {
+                width: 100%;
+                flex-basis: 100%;
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 5px;
+                margin-top: 2px;
+            }
+
+            .btn-preset {
+                width: 100%;
+                min-height: 44px; /* WCAG Touch Target standard */
+                font-size: 0.7rem;
+                padding: 6px 2px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                border-radius: 6px;
+            }
+
+            /* Stacking toggle and full-width fullscreen button */
+            .toolbar-group:last-of-type {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                width: 100%;
+                padding-top: 8px;
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
+            }
+
+            .toggle-option {
+                width: 100%;
+                min-height: 40px;
+                font-size: 0.76rem;
+                gap: 8px;
+                display: flex;
+                align-items: center;
+            }
+
+            .toggle-option input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                flex-shrink: 0;
+            }
+
+            #btn-fullscreen {
+                width: 100%;
+                min-height: 44px;
+                padding: 8px 14px;
+                font-size: 0.82rem;
+                justify-content: center;
+                border-radius: 8px;
+            }
+
+            /* --- 3. Compact 2x2 Dashboard Grid --- */
+            .dashboard-bar {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                width: 100%;
+            }
+
+            .stat-card {
+                padding: 8px 6px;
+                border-radius: 8px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 58px;
+            }
+
+            .stat-label {
+                font-size: 0.64rem;
+                letter-spacing: 0.2px;
+                margin-bottom: 2px;
+                line-height: 1.2;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
+            }
+
+            .stat-val {
+                font-size: clamp(1.05rem, 4vw, 1.2rem);
+                line-height: 1.15;
+            }
+
+            /* --- Arena & Puerman Mobile Tuning (Zero Clipping) --- */
+            .arena-viewport-wrapper {
+                min-height: 220px;
+            }
+
+            .reaction-arena:not(.is-micro) {
+                height: auto !important;
+                min-height: clamp(240px, 45vh, 320px);
+                border-radius: 14px;
+                padding: 14px 10px;
+            }
+
+            .arena-content {
+                padding: 10px 4px;
+            }
+
+            .arena-title {
+                font-size: clamp(1.6rem, 6vw, 2.2rem);
+                margin-bottom: 6px;
+            }
+
+            .arena-subtitle {
+                font-size: 0.82rem;
+                line-height: 1.35;
+            }
+
+            .action-hint {
+                font-size: 0.82rem;
+                padding: 6px 14px;
+                margin-top: 8px;
+                line-height: 1.3;
+            }
+
+            .puerman-result-layout {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                padding: 0;
+                margin-bottom: 8px !important;
+            }
+
+            .puerman-col.left {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+                padding-right: 0;
+                padding-bottom: 8px;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .puerman-col.right {
+                padding-left: 0;
+                justify-content: center;
+            }
+
+            .puerman-meta {
+                font-size: 0.68rem;
+            }
+
+            .puerman-number-avg,
+            .puerman-number-current {
+                font-size: clamp(1.9rem, 7vw, 2.5rem);
+            }
+
+            .puerman-unit {
+                font-size: 1.1rem;
+            }
+
+            /* --- Controls Footer --- */
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                width: 100%;
+                margin-top: 4px;
+            }
+
+            #btn-reset {
+                width: 100%;
+                min-height: 44px;
+                justify-content: center;
+                font-size: 0.85rem;
+                padding: 10px;
+            }
+
+            .hint-keyboard {
+                text-align: center;
+                font-size: 0.74rem;
+                opacity: 0.8;
             }
         }
     </style>
@@ -769,7 +1282,7 @@
         <header>
             <div class="title-group">
                 <h1 id="i18n-title">Test Viteză de Reacție</h1>
-                <p id="i18n-subtitle" style="color: var(--text-secondary); font-size: 0.82rem; margin-top: 2px;">Măsurare ultra-precisă a latenței neuromusculare</p>
+                <p id="i18n-subtitle" class="title-subtitle">Măsurare ultra-precisă a latenței neuromusculare</p>
             </div>
             <div class="header-badges">
                 <div class="lang-selector" id="lang-selector">
@@ -813,7 +1326,7 @@
                     <input type="checkbox" id="chk-random-pos">
                     <span id="i18n-random-label">Poziție aleatorie (Flick Reflex)</span>
                 </label>
-                <button id="btn-fullscreen" class="btn-action" style="padding: 5px 10px; font-size: 0.78rem;">
+                <button id="btn-fullscreen" class="btn-action">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
                     </svg>
@@ -917,7 +1430,7 @@
     let stimulusStartTime = 0;
     let currentScalePct = 70;
 
-    // --- Multi-Language Support (RO / EN / RU) ---
+    // --- Multi-Language Support (RO / EN / RU) with Touch-Aware Strings ---
     const I18N = {
         ro: {
             title: "Test Viteză de Reacție",
@@ -931,26 +1444,34 @@
             colAttempt: "Încercare",
             colResult: "Rezultat (ms)",
             idleTitle: "Click pentru Start",
+            idleTitle_touch: "Atinge pentru Start",
             idleSub: "Când fundalul devine VERDE, apasă mouse-ul sau tasta SPAȚIU cât mai rapid posibil.",
+            idleSub_touch: "Când fundalul devine VERDE, atinge ecranul cât mai rapid posibil.",
             idleHint: "Apasă oriunde pe ecran",
+            idleHint_touch: "Atinge ecranul pentru start",
             waitTitle: "ATENȚIE",
             waitSub: "Așteaptă culoarea verde... Nu apăsa dinainte!",
             waitMicro: "AȘTEAPTĂ",
             earlyTitle: "PREA DEVREME!",
             earlySub: "Ai apăsat înainte ca ecranul să devină verde. Încercarea a fost anulată.",
             earlyHint: "Click sau Spațiu pentru a reîncerca",
+            earlyHint_touch: "Atinge ecranul pentru a reîncerca",
             goTitle: "CLICK ACUM!",
+            goTitle_touch: "ATINGE ACUM!",
             goSub: "Apasă mouse-ul sau tasta Spațiu!",
+            goSub_touch: "Atinge ecranul ACUM!",
             resAttempt: "Încercarea",
             resAvg: "Timp Mediu",
             resHint: "Click sau apasă Spațiu pentru încercarea",
+            resHint_touch: "Atinge ecranul pentru încercarea",
             resMicroNext: "URMĂTORUL",
             statCount: "Încercări Finalizate",
             statBest: "Cel Mai Rapid (Best)",
             statAvg: "Media Sesiunii (Avg)",
             statWorst: "Cel Mai Lent (Worst)",
             btnReset: "Resetează Sesiunea",
-            hintKeyboard: `Control: <kbd>Click Stânga</kbd> sau <kbd>Bara de Spațiu</kbd>`
+            hintKeyboard: `Control: <kbd>Click Stânga</kbd> sau <kbd>Bara de Spațiu</kbd>`,
+            hintKeyboard_touch: `Control: <kbd>Atinge Ecranul (Touch)</kbd>`
         },
         en: {
             title: "Reaction Time Test",
@@ -964,26 +1485,34 @@
             colAttempt: "Attempt",
             colResult: "Result (ms)",
             idleTitle: "Click to Start",
+            idleTitle_touch: "Tap to Start",
             idleSub: "When the background turns GREEN, click the mouse or press SPACE as quickly as possible.",
+            idleSub_touch: "When the background turns GREEN, tap the screen as quickly as possible.",
             idleHint: "Click anywhere on screen",
+            idleHint_touch: "Tap screen to start",
             waitTitle: "WAIT FOR GREEN",
             waitSub: "Wait for green... Do not click early!",
             waitMicro: "WAIT",
             earlyTitle: "TOO EARLY!",
             earlySub: "You clicked before the screen turned green. The attempt was canceled.",
             earlyHint: "Click or press Space to retry",
+            earlyHint_touch: "Tap screen to retry",
             goTitle: "CLICK NOW!",
+            goTitle_touch: "TAP NOW!",
             goSub: "Press mouse or Spacebar!",
+            goSub_touch: "Tap screen NOW!",
             resAttempt: "Attempt",
             resAvg: "Average Time",
             resHint: "Click or press Space for attempt",
+            resHint_touch: "Tap screen for attempt",
             resMicroNext: "NEXT",
             statCount: "Completed Attempts",
             statBest: "Fastest (Best)",
             statAvg: "Session Average (Avg)",
             statWorst: "Slowest (Worst)",
             btnReset: "Reset Session",
-            hintKeyboard: `Controls: <kbd>Left Click</kbd> or <kbd>Spacebar</kbd>`
+            hintKeyboard: `Controls: <kbd>Left Click</kbd> or <kbd>Spacebar</kbd>`,
+            hintKeyboard_touch: `Controls: <kbd>Tap Screen (Touch)</kbd>`
         },
         ru: {
             title: "Тест скорости реакции",
@@ -997,30 +1526,50 @@
             colAttempt: "Попытка",
             colResult: "Результат (мс)",
             idleTitle: "Нажмите для старта",
+            idleTitle_touch: "Коснитесь для старта",
             idleSub: "Когда фон станет ЗЕЛЕНЫМ, нажмите мышь или ПРОБЕЛ как можно быстрее.",
+            idleSub_touch: "Когда фон станет ЗЕЛЕНЫМ, коснитесь экрана как можно быстрее.",
             idleHint: "Нажмите в любом месте экрана",
+            idleHint_touch: "Коснитесь экрана для старта",
             waitTitle: "ЖДИТЕ ЗЕЛЕНЫЙ",
             waitSub: "Ждите зеленый цвет... Не нажимайте заранее!",
             waitMicro: "ЖДИТЕ",
             earlyTitle: "СЛИШКОМ РАНО!",
             earlySub: "Вы нажали до того, как экран стал зеленым. Попытка отменена.",
             earlyHint: "Нажмите мышь или Пробел для повтора",
+            earlyHint_touch: "Коснитесь экрана для повтора",
             goTitle: "КЛИКАЙТЕ СЕЙЧАС!",
+            goTitle_touch: "КАСАЙТЕСЬ СЕЙЧАС!",
             goSub: "Нажмите мышь или клавишу Пробел!",
+            goSub_touch: "Коснитесь экрана СЕЙЧАС!",
             resAttempt: "Попытка",
             resAvg: "Среднее время",
             resHint: "Нажмите мышь или Пробел для попытки",
+            resHint_touch: "Коснитесь экрана для попытки",
             resMicroNext: "СЛЕДУЮЩИЙ",
             statCount: "Завершено попыток",
             statBest: "Самый быстрый (Best)",
             statAvg: "Среднее по сессии (Avg)",
             statWorst: "Самый медленный (Worst)",
             btnReset: "Сбросить сессию",
-            hintKeyboard: `Управление: <kbd>ЛКМ</kbd> или <kbd>Пробел</kbd>`
+            hintKeyboard: `Управление: <kbd>ЛКМ</kbd> или <kbd>Пробел</kbd>`,
+            hintKeyboard_touch: `Управление: <kbd>Касание экрана (Touch)</kbd>`
         }
     };
 
     let currentLang = 'ro';
+
+    function isTouchDevice() {
+        return ('ontouchstart' in window) ||
+               (navigator.maxTouchPoints > 0) ||
+               (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+    }
+
+    function getLocalizedHint(key) {
+        const isTouch = isTouchDevice();
+        const dict = I18N[currentLang] || I18N.ro;
+        return (isTouch && dict[key + '_touch']) ? dict[key + '_touch'] : dict[key];
+    }
 
     function setLanguage(lang) {
         if (!I18N[lang]) return;
@@ -1084,11 +1633,12 @@
         if (elBtnReset) elBtnReset.textContent = t.btnReset;
 
         const elHintKb = document.getElementById('i18n-hint-keyboard');
-        if (elHintKb) elHintKb.innerHTML = t.hintKeyboard;
+        if (elHintKb) elHintKb.innerHTML = getLocalizedHint('hintKeyboard');
 
         // Refresh views
         updateScoreboard();
         refreshCurrentView();
+        applyScale(currentScalePct, false);
         saveConfig();
     }
 
@@ -1153,6 +1703,43 @@
     }
 
     // --- Dynamic Sizing Logic (Zero Slider Shift + Perfect Alignment) ---
+    function getAvailablePlayfieldSpace() {
+        const wrap = document.getElementById('content-wrap');
+        if (!wrap) return Math.round(window.innerHeight * 0.55);
+
+        const header = wrap.querySelector('header');
+        const toolbar = wrap.querySelector('.toolbar-card');
+        const scoreboard = wrap.querySelector('.scoreboard-card');
+        const dashboard = wrap.querySelector('.dashboard-bar');
+        const controls = wrap.querySelector('.controls-row');
+
+        // Measure actual rendered pixel heights from the DOM
+        const topH = (header ? header.getBoundingClientRect().height : 40) +
+                     (toolbar ? toolbar.getBoundingClientRect().height : 46) +
+                     (scoreboard ? scoreboard.getBoundingClientRect().height : 56);
+
+        const bottomH = (dashboard ? dashboard.getBoundingClientRect().height : 62) +
+                        (controls ? controls.getBoundingClientRect().height : 34);
+
+        // Body paddings
+        const bodyStyle = window.getComputedStyle(document.body);
+        const padTop = parseFloat(bodyStyle.paddingTop) || 16;
+        const padBottom = parseFloat(bodyStyle.paddingBottom) || 16;
+
+        // Container gaps (5 gaps of 10px between the 6 child elements in #content-wrap)
+        const wrapStyle = window.getComputedStyle(wrap);
+        const gap = parseFloat(wrapStyle.rowGap || wrapStyle.gap) || 10;
+        const totalGaps = 5 * gap;
+
+        // Total vertical space taken by parent containers (top), child containers (bottom), body padding, and gaps
+        const totalOccupied = padTop + padBottom + totalGaps + topH + bottomH;
+
+        // Exact vertical space remaining in 100% viewport between parent and child containers
+        const availableSpace = window.innerHeight - totalOccupied;
+
+        return Math.max(160, availableSpace);
+    }
+
     function applyScale(pct, updateToolbar = true) {
         currentScalePct = parseInt(pct, 10);
         sizeSlider.value = currentScalePct;
@@ -1171,16 +1758,14 @@
             arenaWrapper.classList.add('micro-playfield');
             arena.classList.add('is-micro');
 
-            document.documentElement.style.setProperty('--arena-max-w', '960px');
-            document.documentElement.style.setProperty('--scoreboard-max-w', '960px');
-            if (updateToolbar) {
-                document.documentElement.style.setProperty('--toolbar-max-w', '960px');
-            }
+            document.documentElement.style.setProperty('--arena-max-w', '70vw');
 
-            // Target circle size scales continuously: 10% -> 60px, 25% -> 150px
-            const targetSize = Math.round(60 + ((currentScalePct - 10) / 15) * 90);
+            // Target circle size scales continuously with +25% boost: 10% -> 69px, 25% -> 150px (matches GitHub)
+            const targetSize = Math.round((55 + ((currentScalePct - 10) / 15) * 65) * 1.25);
             arena.style.width = `${targetSize}px`;
             arena.style.height = `${targetSize}px`;
+            arena.style.minHeight = 'unset';
+            arena.style.aspectRatio = '1 / 1';
 
             if (!chkRandomPos.checked) {
                 resetTargetToCenter();
@@ -1194,23 +1779,28 @@
             arena.style.top = 'auto';
             arena.style.left = 'auto';
             arena.style.transform = 'none';
+            arena.style.minHeight = '';
+            arena.style.aspectRatio = '';
 
-            // Continuous viewport width scaling for the reaction arena (30vw, 50vw, 80vw, 95vw etc.)
-            const arenaWidthPx = Math.round((currentScalePct / 100) * window.innerWidth);
-            document.documentElement.style.setProperty('--arena-max-w', `min(96vw, ${arenaWidthPx}px)`);
+            // Dynamic canvas width (Scoreboard, Arena, Dashboard, Controls)
+            document.documentElement.style.setProperty('--arena-max-w', `${currentScalePct}vw`);
 
-            // Scoreboard & dashboard expand with arena when >960px, but stay comfortably at 960px when smaller
-            const scoreWidthPx = Math.max(960, arenaWidthPx);
-            document.documentElement.style.setProperty('--scoreboard-max-w', `min(96vw, ${scoreWidthPx}px)`);
+            // Formula GitHub gold-standard cu boost +25%:
+            // GitHub original: 300 + ((scalePct - 25) / 70) * (innerHeight * 0.44)
+            // La 70% pe 1080p: ~494px → boosted ~618px
+            // La 95% pe 1080p: ~602px → boosted ~752px  (diferență enormă, vizibilă)
+            // Overflow la 95% este acceptabil — dashboard-ul poate fi sub fold.
+            const PLAYFIELD_BOOST = 1.0; // fără boost suplimentar (formula GitHub pură)
+            const heightPx = Math.round((300 + ((currentScalePct - 25) / 70) * (window.innerHeight * 0.44)) * PLAYFIELD_BOOST);
+            document.documentElement.style.setProperty('--arena-calculated-height', `${heightPx}px`);
 
-            if (updateToolbar) {
-                const toolbarWidthPx = Math.max(760, arenaWidthPx);
-                document.documentElement.style.setProperty('--toolbar-max-w', `min(96vw, ${toolbarWidthPx}px)`);
+            if (window.innerWidth <= 768) {
+                arena.style.width = '100%';
+                arena.style.height = ''; // Allow CSS responsive media query height: auto !important to prevent any clipping on mobile
+            } else {
+                arena.style.width = '100%';
+                arena.style.height = `${heightPx}px`;
             }
-
-            const heightPx = Math.round(300 + ((currentScalePct - 25) / 70) * (window.innerHeight * 0.44));
-            arena.style.width = '100%';
-            arena.style.height = `${heightPx}px`;
         }
 
         refreshCurrentView();
@@ -1296,6 +1886,7 @@
             document.body.classList.add('is-immersive');
         }
         updateFullscreenButton();
+        applyScale(currentScalePct, false);
     });
 
     // --- Scoreboard Engine ---
@@ -1342,9 +1933,27 @@
         scoreboardTheadRow.innerHTML = headerHtml;
         scoreboardTbodyRow.innerHTML = dataHtml;
 
-        if (scoreboardCard.scrollWidth > scoreboardCard.clientWidth) {
-            scoreboardCard.scrollLeft = scoreboardCard.scrollWidth;
+        function scrollToActiveAttempt() {
+            if (!scoreboardCard) return;
+            const activeCell = scoreboardTbodyRow.querySelector('td.active-cell');
+            if (!activeCell) return;
+
+            const stickyCol = scoreboardTbodyRow.querySelector('.label-col');
+            const stickyColWidth = stickyCol ? stickyCol.offsetWidth : 96;
+
+            const cellLeft = activeCell.offsetLeft;
+            const cellWidth = activeCell.offsetWidth;
+            const visibleScrollWidth = scoreboardCard.clientWidth - stickyColWidth;
+
+            const targetScroll = (cellLeft - stickyColWidth) - (visibleScrollWidth / 2) + (cellWidth / 2);
+
+            scoreboardCard.scrollTo({
+                left: Math.max(0, targetScroll),
+                behavior: 'smooth'
+            });
         }
+
+        requestAnimationFrame(scrollToActiveAttempt);
 
         if (scores.length > 0) {
             const min = Math.min(...scores);
@@ -1382,9 +1991,9 @@
             `;
         } else {
             arenaContent.innerHTML = `
-                <div class="arena-title">${t.idleTitle}</div>
-                <div class="arena-subtitle">${t.idleSub}</div>
-                <div class="action-hint">${t.idleHint}</div>
+                <div class="arena-title">${getLocalizedHint('idleTitle')}</div>
+                <div class="arena-subtitle">${getLocalizedHint('idleSub')}</div>
+                <div class="action-hint">${getLocalizedHint('idleHint')}</div>
             `;
         }
     }
@@ -1401,8 +2010,8 @@
             `;
         } else {
             arenaContent.innerHTML = `
-                <div class="arena-title">${t.waitTitle}</div>
-                <div class="arena-subtitle">${t.waitSub}</div>
+                <div class="arena-title">${getLocalizedHint('waitTitle')}</div>
+                <div class="arena-subtitle">${getLocalizedHint('waitSub')}</div>
             `;
         }
     }
@@ -1422,7 +2031,7 @@
             arenaContent.innerHTML = `
                 <div class="arena-title">${t.earlyTitle}</div>
                 <div class="arena-subtitle">${t.earlySub}</div>
-                <div class="action-hint">${t.earlyHint}</div>
+                <div class="action-hint">${getLocalizedHint('earlyHint')}</div>
             `;
         }
     }
@@ -1442,7 +2051,7 @@
             `;
         } else {
             arenaContent.innerHTML = `
-                <div class="puerman-result-layout" style="margin-bottom: 18px;">
+                <div class="puerman-result-layout">
                     <div class="puerman-col left">
                         <div class="puerman-meta">
                             <div>${t.resAttempt} ${scores.length}</div>
@@ -1457,7 +2066,7 @@
                     </div>
                 </div>
                 <div class="action-hint">
-                    ${t.resHint} ${scores.length + 1}
+                    ${getLocalizedHint('resHint')} ${scores.length + 1}
                 </div>
             `;
         }
@@ -1474,8 +2083,8 @@
                 `;
             } else {
                 arenaContent.innerHTML = `
-                    <div class="arena-title">${t.goTitle}</div>
-                    <div class="arena-subtitle">${t.goSub}</div>
+                    <div class="arena-title">${getLocalizedHint('goTitle')}</div>
+                    <div class="arena-subtitle">${getLocalizedHint('goSub')}</div>
                 `;
             }
             
@@ -1538,6 +2147,7 @@
 
     arena.addEventListener('pointerdown', (e) => {
         if (e.button === 0) {
+            e.preventDefault();
             handleUserInput(e);
         }
     });
@@ -1556,6 +2166,11 @@
     loadSavedConfig();
     setLanguage(currentLang);
     applyScale(currentScalePct, true);
+
+    // Recalibrate once fonts and full page assets finish loading
+    window.addEventListener('load', () => {
+        applyScale(currentScalePct, false);
+    });
 </script>
 
 </body>
