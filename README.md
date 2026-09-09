@@ -4,7 +4,7 @@
 
 **A modern, ultra-responsive benchmarking tool for measuring human reflexes and input latency with sub-millisecond precision.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-test--reaction.monard.online-10b981?style=for-the-badge&logo=googlechrome&logoColor=white)](https://test-reaction.monard.online)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-testreaction.monard.online-10b981?style=for-the-badge&logo=googlechrome&logoColor=white)](https://testreaction.monard.online)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero%20(Pure%20Vanilla)-blue?style=for-the-badge)](https://github.com/)
 [![License](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)](LICENSE)
 [![Languages](https://img.shields.io/badge/i18n-RO%20|%20EN%20|%20RU-orange?style=for-the-badge)](https://github.com/)
