@@ -3,10 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Reaction Speed Test</title>
+    <title>Reaction Speed Test | Test Viteză de Reacție</title>
+    <meta name="description" content="Măsurare ultra-precisă a latenței neuromusculare cu latență hardware 0. Testează-ți viteza de reacție și antrenează-ți reflexele cu precizie de milisecundă.">
+    <meta name="theme-color" content="#0b0c0b" id="meta-theme-color">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://test-reaction.monard.online/">
+    <meta property="og:title" content="Reaction Speed Test | Test Viteză de Reacție">
+    <meta property="og:description" content="Măsurare ultra-precisă a latenței neuromusculare cu latență hardware 0. Testează-ți viteza de reacție și antrenează-ți reflexele cu precizie de milisecundă.">
+    <meta property="og:image" content="https://test-reaction.monard.online/og-image.jpg">
+    <meta property="og:image:secure_url" content="https://test-reaction.monard.online/og-image.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Reaction Speed Test Preview">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://test-reaction.monard.online/">
+    <meta name="twitter:title" content="Reaction Speed Test | Test Viteză de Reacție">
+    <meta name="twitter:description" content="Măsurare ultra-precisă a latenței neuromusculare cu latență hardware 0. Testează-ți viteza de reacție și antrenează-ți reflexele cu precizie de milisecundă.">
+    <meta name="twitter:image" content="https://test-reaction.monard.online/og-image.jpg">
+    <meta name="twitter:image:alt" content="Reaction Speed Test Preview">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            try {
+                var raw = localStorage.getItem('reaction_test_config');
+                if (raw) {
+                    var c = JSON.parse(raw);
+                    if (c && c.theme === 'light') {
+                        document.documentElement.setAttribute('data-theme', 'light');
+                    }
+                }
+            } catch(e) {}
+        })();
+    </script>
     <style>
         :root {
             /* UNA MD Dark Theme Background & Aesthetics (identical to installunamd.unisim-soft.com) */
@@ -31,9 +67,103 @@
             --color-result: #1e2430;
             --color-early: #881337;
 
+            /* Adaptive Theme Tokens */
+            --title-gradient: linear-gradient(135deg, #ffffff 30%, #93c5fd 100%);
+            --label-col-bg: #131418;
+            --label-col-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+            --table-td-color: #cbd5e1;
+            --table-highlight-best: #4ade80;
+            --table-highlight-best-glow: rgba(74, 222, 128, 0.45);
+            --table-active-color: #38bdf8;
+            --btn-preset-bg: #1a2332;
+            --btn-preset-color: #94a3b8;
+            --btn-preset-hover-color: #f1f5f9;
+            --btn-preset-border: var(--border-color);
+            --btn-action-bg: #1e293b;
+            --btn-action-color: #cbd5e1;
+            --btn-action-hover-bg: #334155;
+            --btn-action-hover-color: #ffffff;
+            --slider-track-bg: #263244;
+            --slider-thumb-bg: #38bdf8;
+            --slider-thumb-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+            --badge-scale-color: #38bdf8;
+            --badge-scale-bg: rgba(56, 189, 248, 0.1);
+            --badge-scale-border: rgba(56, 189, 248, 0.25);
+            --precision-badge-bg: rgba(34, 197, 94, 0.12);
+            --precision-badge-border: rgba(34, 197, 94, 0.3);
+            --precision-badge-color: #4ade80;
+            --kbd-bg: #1e293b;
+            --kbd-color: #f1f5f9;
+            --stat-best-color: #4ade80;
+            --stat-worst-color: #f87171;
+            --scrollbar-thumb: #38bdf8;
+            --scrollbar-track: #1a2332;
+            --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            --arena-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+            --micro-playfield-bg: rgba(20, 27, 38, 0.4);
+
             /* Dynamic adjustable arena width & calculated height */
             --arena-max-w: 70vw;
             --arena-calculated-height: 560px;
+        }
+
+        /* Comprehensive Light Mode Theme */
+        [data-theme="light"] {
+            --ink: #f8fafc;
+            --ink-2: #ffffff;
+            --ink-3: #f1f5f9;
+            --bg-glow: radial-gradient(850px 520px at 80% -5%, rgba(56, 189, 248, 0.16), transparent 60%),
+                       radial-gradient(750px 650px at -5% 15%, rgba(249, 115, 22, 0.10), transparent 55%),
+                       radial-gradient(900px 500px at 50% 100%, rgba(99, 102, 241, 0.06), transparent 60%);
+            --grid-line: rgba(15, 23, 42, 0.055);
+            --grid-op: 0.65;
+
+            --bg-body: var(--ink);
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --border-color: rgba(203, 213, 225, 0.85);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+
+            /* State Colors for Light Mode: elegant, deep, high-contrast */
+            --color-idle: #1e293b;
+            --color-wait: #dc2626;
+            --color-go: #16a34a;
+            --color-result: #0f172a;
+            --color-early: #991b1b;
+
+            --title-gradient: linear-gradient(135deg, #0f172a 35%, #0284c7 100%);
+            --label-col-bg: #ffffff;
+            --label-col-shadow: 3px 0 10px rgba(15, 23, 42, 0.08);
+            --table-td-color: #1e293b;
+            --table-highlight-best: #16a34a;
+            --table-highlight-best-glow: rgba(22, 163, 74, 0.25);
+            --table-active-color: #0284c7;
+            --btn-preset-bg: #f1f5f9;
+            --btn-preset-color: #475569;
+            --btn-preset-hover-color: #0f172a;
+            --btn-preset-border: rgba(203, 213, 225, 0.9);
+            --btn-action-bg: #ffffff;
+            --btn-action-color: #334155;
+            --btn-action-hover-bg: #f1f5f9;
+            --btn-action-hover-color: #0f172a;
+            --slider-track-bg: #e2e8f0;
+            --slider-thumb-bg: #0284c7;
+            --slider-thumb-shadow: 0 0 10px rgba(2, 132, 199, 0.45);
+            --badge-scale-color: #0284c7;
+            --badge-scale-bg: rgba(2, 132, 199, 0.1);
+            --badge-scale-border: rgba(2, 132, 199, 0.3);
+            --precision-badge-bg: rgba(22, 163, 74, 0.1);
+            --precision-badge-border: rgba(22, 163, 74, 0.3);
+            --precision-badge-color: #15803d;
+            --kbd-bg: #e2e8f0;
+            --kbd-color: #1e293b;
+            --stat-best-color: #16a34a;
+            --stat-worst-color: #dc2626;
+            --scrollbar-thumb: #94a3b8;
+            --scrollbar-track: #f1f5f9;
+            --card-shadow: 0 4px 20px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04);
+            --arena-shadow: 0 14px 38px rgba(15, 23, 42, 0.22);
+            --micro-playfield-bg: rgba(241, 245, 249, 0.75);
         }
 
         * {
@@ -143,7 +273,7 @@
             font-size: 1.55rem;
             font-weight: 800;
             letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #ffffff 30%, #93c5fd 100%);
+            background: var(--title-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -160,26 +290,72 @@
             gap: 8px;
         }
 
+        /* Theme Toggle Button */
+        .btn-theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 9999px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0;
+            flex-shrink: 0;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-theme-toggle:hover {
+            color: var(--text-primary);
+            border-color: var(--table-active-color);
+            transform: scale(1.06);
+        }
+
+        .btn-theme-toggle:active {
+            transform: scale(0.94);
+        }
+
+        .btn-theme-toggle .icon-sun {
+            display: block;
+        }
+
+        .btn-theme-toggle .icon-moon {
+            display: none;
+        }
+
+        [data-theme="light"] .btn-theme-toggle .icon-sun {
+            display: none;
+        }
+
+        [data-theme="light"] .btn-theme-toggle .icon-moon {
+            display: block;
+        }
+
         .badge-precision {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(34, 197, 94, 0.12);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #4ade80;
+            background: var(--precision-badge-bg);
+            border: 1px solid var(--precision-badge-border);
+            color: var(--precision-badge-color);
             font-size: 0.72rem;
             font-weight: 600;
             padding: 4px 10px;
             border-radius: 9999px;
             font-family: 'JetBrains Mono', monospace;
+            transition: all 0.15s ease;
         }
 
         .badge-precision .dot {
             width: 6px;
             height: 6px;
-            background-color: #4ade80;
+            background-color: var(--precision-badge-color);
             border-radius: 50%;
-            box-shadow: 0 0 8px #4ade80;
+            box-shadow: 0 0 8px var(--precision-badge-color);
             animation: pulse 2s infinite;
         }
 
@@ -192,7 +368,7 @@
         .lang-selector {
             display: inline-flex;
             align-items: center;
-            background: rgba(19, 20, 24, 0.85);
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 9999px;
             padding: 2px 3px;
@@ -215,7 +391,7 @@
         }
 
         .btn-lang:hover {
-            color: #ffffff;
+            color: var(--text-primary);
         }
 
         .btn-lang.active {
@@ -235,7 +411,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            box-shadow: var(--card-shadow);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
         }
@@ -268,7 +444,7 @@
             -webkit-appearance: none;
             width: 140px;
             height: 8px;
-            background: #263244;
+            background: var(--slider-track-bg);
             border-radius: 4px;
             outline: none;
             cursor: pointer;
@@ -279,9 +455,9 @@
             width: 18px;
             height: 18px;
             border-radius: 50%;
-            background: #38bdf8;
+            background: var(--slider-thumb-bg);
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+            box-shadow: var(--slider-thumb-shadow);
             transition: transform 0.1s;
         }
 
@@ -293,9 +469,9 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.82rem;
             font-weight: 700;
-            color: #38bdf8;
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.25);
+            color: var(--badge-scale-color);
+            background: var(--badge-scale-bg);
+            border: 1px solid var(--badge-scale-border);
             padding: 2px 7px;
             border-radius: 6px;
             min-width: 48px;
@@ -308,9 +484,9 @@
         }
 
         .btn-preset {
-            background: #1a2332;
-            border: 1px solid var(--border-color);
-            color: #94a3b8;
+            background: var(--btn-preset-bg);
+            border: 1px solid var(--btn-preset-border);
+            color: var(--btn-preset-color);
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 0.76rem;
@@ -321,8 +497,8 @@
         }
 
         .btn-preset:hover {
-            color: #f1f5f9;
-            border-color: #38bdf8;
+            color: var(--btn-preset-hover-color);
+            border-color: var(--table-active-color);
         }
 
         .btn-preset.active {
@@ -355,12 +531,12 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 10px 0;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            box-shadow: var(--card-shadow);
             overflow-x: auto;
             overscroll-behavior-x: contain;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
-            scrollbar-color: #38bdf8 #1a2332;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             position: relative;
@@ -371,7 +547,7 @@
         }
 
         .scoreboard-card::-webkit-scrollbar-thumb {
-            background: #38bdf8;
+            background: var(--scrollbar-thumb);
             border-radius: 4px;
         }
 
@@ -399,7 +575,7 @@
             position: sticky;
             left: 0;
             z-index: 5;
-            background: #131418;
+            background: var(--label-col-bg);
             text-align: left;
             font-weight: 600;
             color: var(--text-secondary);
@@ -410,7 +586,7 @@
             max-width: 110px;
             white-space: nowrap;
             border-right: 1px solid var(--border-color);
-            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--label-col-shadow);
         }
 
         .scoreboard-table th.label-col {
@@ -431,13 +607,13 @@
             font-size: 1rem;
             font-weight: 700;
             padding: 8px 4px 3px 4px;
-            color: #cbd5e1;
+            color: var(--table-td-color);
             white-space: nowrap;
             transition: font-size 0.15s ease, padding 0.15s ease;
         }
 
         .scoreboard-table td.active-cell {
-            color: #38bdf8;
+            color: var(--table-active-color);
             position: relative;
         }
 
@@ -448,13 +624,13 @@
             left: 15%;
             width: 70%;
             height: 2px;
-            background: #38bdf8;
+            background: var(--table-active-color);
             border-radius: 2px;
         }
 
         .scoreboard-table td.highlight-best {
-            color: #4ade80;
-            text-shadow: 0 0 10px rgba(74, 222, 128, 0.45);
+            color: var(--table-highlight-best);
+            text-shadow: 0 0 10px var(--table-highlight-best-glow);
         }
 
         /* Density compacting classes */
@@ -480,7 +656,7 @@
         }
 
         .arena-viewport-wrapper.micro-playfield {
-            background: rgba(20, 27, 38, 0.4);
+            background: var(--micro-playfield-bg);
             border: 1px dashed var(--border-color);
             border-radius: 18px;
             height: clamp(200px, 40vh, 320px);
@@ -497,10 +673,11 @@
             justify-content: center;
             cursor: pointer;
             transition: background-color 0.08s ease, transform 0.06s ease, box-shadow 0.2s ease;
-            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+            box-shadow: var(--arena-shadow);
             will-change: background-color, transform;
             overflow: hidden;
             touch-action: none;
+            color: #ffffff;
 
             width: 100%;
             height: var(--arena-calculated-height, 500px);
@@ -700,6 +877,7 @@
             text-align: center;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
+            box-shadow: var(--card-shadow);
         }
 
         .stat-label {
@@ -718,8 +896,8 @@
             color: var(--text-primary);
         }
 
-        .stat-val.val-best { color: #4ade80; }
-        .stat-val.val-worst { color: #f87171; }
+        .stat-val.val-best { color: var(--stat-best-color); }
+        .stat-val.val-worst { color: var(--stat-worst-color); }
 
         /* Controls Footer */
         .controls-row {
@@ -730,9 +908,9 @@
         }
 
         .btn-action {
-            background: #1e293b;
+            background: var(--btn-action-bg);
             border: 1px solid var(--border-color);
-            color: #cbd5e1;
+            color: var(--btn-action-color);
             padding: 7px 14px;
             border-radius: 8px;
             font-size: 0.82rem;
@@ -745,9 +923,9 @@
         }
 
         .btn-action:hover {
-            background: #334155;
-            color: #ffffff;
-            border-color: #64748b;
+            background: var(--btn-action-hover-bg);
+            color: var(--btn-action-hover-color);
+            border-color: var(--border-color);
         }
 
         .hint-keyboard {
@@ -756,13 +934,13 @@
         }
 
         .hint-keyboard kbd {
-            background-color: #1e293b;
+            background-color: var(--kbd-bg);
             border: 1px solid var(--border-color);
             border-radius: 4px;
             padding: 2px 6px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.75rem;
-            color: #f1f5f9;
+            color: var(--kbd-color);
         }
 
         /* ==========================================================================
@@ -898,7 +1076,7 @@
                 align-items: center;
                 width: 100%;
                 padding-top: 8px;
-                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                border-top: 1px solid var(--border-color);
             }
 
             #btn-fullscreen {
@@ -1018,6 +1196,11 @@
                 gap: 6px;
             }
 
+            .btn-theme-toggle {
+                min-width: 32px;
+                min-height: 32px;
+            }
+
             .lang-selector {
                 padding: 2px 4px;
                 gap: 2px;
@@ -1123,7 +1306,7 @@
                 gap: 8px;
                 width: 100%;
                 padding-top: 8px;
-                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                border-top: 1px solid var(--border-color);
             }
 
             .toggle-option {
@@ -1285,6 +1468,22 @@
                 <p id="i18n-subtitle" class="title-subtitle">Măsurare ultra-precisă a latenței neuromusculare</p>
             </div>
             <div class="header-badges">
+                <button id="theme-toggle" class="btn-theme-toggle" aria-label="Comută Tema Luminos / Întunecat" title="Comută Tema Luminos / Întunecat">
+                    <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2"></path>
+                        <path d="M12 20v2"></path>
+                        <path d="m4.93 4.93 1.41 1.41"></path>
+                        <path d="m17.66 17.66 1.41 1.41"></path>
+                        <path d="M2 12h2"></path>
+                        <path d="M20 12h2"></path>
+                        <path d="m6.34 17.66-1.41 1.41"></path>
+                        <path d="m19.07 4.93-1.41 1.41"></path>
+                    </svg>
+                    <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                    </svg>
+                </button>
                 <div class="lang-selector" id="lang-selector">
                     <button class="btn-lang active" data-lang="ro">RO</button>
                     <button class="btn-lang" data-lang="en">EN</button>
@@ -1471,7 +1670,10 @@
             statWorst: "Cel Mai Lent (Worst)",
             btnReset: "Resetează Sesiunea",
             hintKeyboard: `Control: <kbd>Click Stânga</kbd> sau <kbd>Bara de Spațiu</kbd>`,
-            hintKeyboard_touch: `Control: <kbd>Atinge Ecranul (Touch)</kbd>`
+            hintKeyboard_touch: `Control: <kbd>Atinge Ecranul (Touch)</kbd>`,
+            themeToggle: "Comută tema (Luminos / Întunecat)",
+            themeToggleLight: "Comută la modul Întunecat",
+            themeToggleDark: "Comută la modul Luminos"
         },
         en: {
             title: "Reaction Time Test",
@@ -1512,7 +1714,10 @@
             statWorst: "Slowest (Worst)",
             btnReset: "Reset Session",
             hintKeyboard: `Controls: <kbd>Left Click</kbd> or <kbd>Spacebar</kbd>`,
-            hintKeyboard_touch: `Controls: <kbd>Tap Screen (Touch)</kbd>`
+            hintKeyboard_touch: `Controls: <kbd>Tap Screen (Touch)</kbd>`,
+            themeToggle: "Toggle theme (Light / Dark)",
+            themeToggleLight: "Switch to Dark mode",
+            themeToggleDark: "Switch to Light mode"
         },
         ru: {
             title: "Тест скорости реакции",
@@ -1553,11 +1758,41 @@
             statWorst: "Самый медленный (Worst)",
             btnReset: "Сбросить сессию",
             hintKeyboard: `Управление: <kbd>ЛКМ</kbd> или <kbd>Пробел</kbd>`,
-            hintKeyboard_touch: `Управление: <kbd>Касание экрана (Touch)</kbd>`
+            hintKeyboard_touch: `Управление: <kbd>Касание экрана (Touch)</kbd>`,
+            themeToggle: "Переключить тему (Светлая / Темная)",
+            themeToggleLight: "Переключить на темную тему",
+            themeToggleDark: "Переключить на светлую тему"
         }
     };
 
     let currentLang = 'ro';
+    let currentTheme = 'dark';
+    const themeToggleBtn = document.getElementById('theme-toggle');
+
+    function setTheme(theme) {
+        currentTheme = (theme === 'light') ? 'light' : 'dark';
+        if (currentTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+        }
+
+        const metaThemeColor = document.getElementById('meta-theme-color');
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute('content', currentTheme === 'light' ? '#f8fafc' : '#0b0c0b');
+        }
+
+        updateThemeToggleTooltip();
+        saveConfig();
+    }
+
+    function updateThemeToggleTooltip() {
+        if (!themeToggleBtn) return;
+        const t = I18N[currentLang] || I18N.ro;
+        const tip = currentTheme === 'light' ? (t.themeToggleLight || t.themeToggle) : (t.themeToggleDark || t.themeToggle);
+        themeToggleBtn.setAttribute('title', tip);
+        themeToggleBtn.setAttribute('aria-label', tip);
+    }
 
     function isTouchDevice() {
         return ('ontouchstart' in window) ||
@@ -1617,6 +1852,7 @@
         if (elRandomWrap) elRandomWrap.title = t.randomPosTitle;
 
         updateFullscreenButton();
+        updateThemeToggleTooltip();
 
         // Dashboard
         const elStatCount = document.getElementById('i18n-stat-count');
@@ -1673,8 +1909,16 @@
                 } else {
                     detectBrowserLanguage();
                 }
+                if (config.theme && ['dark', 'light'].includes(config.theme)) {
+                    currentTheme = config.theme;
+                } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    currentTheme = 'light';
+                }
             } else {
                 detectBrowserLanguage();
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    currentTheme = 'light';
+                }
             }
         } catch (e) {
             console.warn('Nu s-au putut încărca preferințele din cache:', e);
@@ -1694,7 +1938,8 @@
             const config = {
                 scale: currentScalePct,
                 randomPos: chkRandomPos.checked,
-                lang: currentLang
+                lang: currentLang,
+                theme: currentTheme
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
         } catch (e) {
@@ -2162,8 +2407,16 @@
         });
     });
 
+    // Theme toggle button listener
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+    }
+
     // Initial load with cache restoration
     loadSavedConfig();
+    setTheme(currentTheme);
     setLanguage(currentLang);
     applyScale(currentScalePct, true);
 
