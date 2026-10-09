@@ -41,9 +41,13 @@ Unlike generic web-based reaction tests that rely on naive `setTimeout` loops an
 - 🌐 **Internationalization (i18n)**:
   - Built-in multi-language engine supporting **English 🇬🇧**, **Română 🇷🇴**, and **Русский 🇷🇺**.
   - Automatic browser locale detection with persistent user preferences saved to `localStorage`.
+- 🌗 **Dual Theme Engine (Dark & Light Mode)**:
+  - Instant one-click toggle between the dark cyberpunk UNA MD aesthetic and an ultra-clean, high-contrast light glassmorphic mode.
+  - Zero-flash pre-render state restoration via `localStorage`.
 - 🎨 **Sleek Cyberpunk & Glassmorphic UI**:
-  - Dark theme aesthetics inspired by UNA MD (subtle radial glows, masked gridlines, high contrast).
+  - Dark & Light theme aesthetics (subtle radial glows, masked gridlines, high contrast).
   - Native Fullscreen toggle with responsive geometry adaptation.
+  - Complete Open Graph & Twitter Card social meta image preview support.
 - 🔒 **Zero Dependencies & 100% Privacy**:
   - Pure Vanilla HTML5, CSS3, and ES6+ JavaScript with zero external runtime dependencies.
   - No trackers, no cookies, no analytics — all session data stays strictly on the client machine.
