@@ -188,7 +188,6 @@
             color: var(--text-primary);
             min-height: 100vh;
             min-height: 100dvh;
-            padding: 10px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -559,6 +558,7 @@
 
         .scoreboard-table {
             min-width: 100%;
+            padding-left: 5px;
             width: max-content;
             table-layout: auto;
             border-collapse: separate;
@@ -993,7 +993,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 2px;
+            margin-bottom: 2px;
         }
 
         .btn-action {
@@ -2159,8 +2159,7 @@
             // La 70% pe 1080p: ~494px → boosted ~618px
             // La 95% pe 1080p: ~602px → boosted ~752px  (diferență enormă, vizibilă)
             // Overflow la 95% este acceptabil — dashboard-ul poate fi sub fold.
-            const PLAYFIELD_BOOST = 1.0; // fără boost suplimentar (formula GitHub pură)
-            const heightPx = Math.round((300 + ((currentScalePct - 25) / 70) * (window.innerHeight * 0.44)) * PLAYFIELD_BOOST);
+            const heightPx = Math.round((300 + ((currentScalePct - 20) / 70) * (window.innerHeight * 0.41)) );
             document.documentElement.style.setProperty('--arena-calculated-height', `${heightPx}px`);
 
             if (window.innerWidth <= 768) {
